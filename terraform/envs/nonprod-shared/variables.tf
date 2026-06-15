@@ -1,0 +1,74 @@
+variable "project_name" {
+  type    = string
+  default = "clustersage"
+}
+
+variable "location" {
+  type    = string
+  default = "eastus"
+}
+
+variable "tags" {
+  type    = map(string)
+  default = {}
+}
+
+variable "state_resource_group_name" {
+  type    = string
+  default = "rg-clustersage-tfstate"
+}
+
+variable "state_storage_account_name" {
+  type    = string
+  default = "stclustersagetfstate"
+}
+
+variable "state_container_name" {
+  type    = string
+  default = "tfstate"
+}
+
+variable "attach_dev_origin" {
+  type    = bool
+  default = false
+}
+
+variable "attach_staging_origin" {
+  type    = bool
+  default = false
+}
+
+variable "dev_origin_host_name_override" {
+  type    = string
+  default = ""
+}
+
+variable "dev_origin_host_header_override" {
+  type    = string
+  default = ""
+}
+
+variable "staging_origin_host_name_override" {
+  type    = string
+  default = ""
+}
+
+variable "staging_origin_host_header_override" {
+  type    = string
+  default = ""
+}
+
+variable "custom_domain_names" {
+  type    = list(string)
+  default = []
+}
+
+variable "create_document_intelligence" {
+  type    = bool
+  default = false
+}
+
+variable "create_openai" {
+  type    = bool
+  default = false
+}

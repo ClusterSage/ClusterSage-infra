@@ -1,0 +1,21 @@
+project_name                    = "clustersage"
+environment                     = "staging"
+location                        = "eastus"
+vnet_address_space              = ["10.43.0.0/16"]
+aks_subnet_prefix               = ["10.43.0.0/23"]
+private_endpoint_subnet_prefix  = ["10.43.10.0/24"]
+management_subnet_prefix        = ["10.43.30.0/24"]
+aks_node_count                  = 2
+aks_vm_size                     = "Standard_D4s_v5"
+api_server_authorized_ip_ranges = []
+postgres_server_name            = "pg-clustersage-staging"
+postgres_admin_login            = "clustersageadmin"
+postgres_admin_password         = "replace-with-strong-password"
+postgres_sku_name               = "B_Standard_B2s"
+postgres_storage_mb             = 32768
+frontdoor_origin_host_name      = "replace-after-kgateway-load-balancer-is-created"
+frontdoor_origin_host_header    = "staging.nexaflow.site"
+create_frontdoor                = false
+tags = {
+  Owner = "platform"
+}

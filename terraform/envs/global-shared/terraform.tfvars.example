@@ -1,0 +1,7 @@
+project_name               = "clustersage"
+location                   = "eastus"
+acr_name                   = "acrclustersagexxxxx"
+acr_anonymous_pull_enabled = false
+tags = {
+  Owner = "platform"
+}

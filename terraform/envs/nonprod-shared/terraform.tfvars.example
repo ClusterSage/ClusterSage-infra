@@ -1,0 +1,12 @@
+project_name          = "clustersage"
+location              = "eastus"
+attach_dev_origin     = false
+attach_staging_origin = false
+custom_domain_names   = ["dev.nexaflow.site", "staging.nexaflow.site"]
+dev_origin_host_header_override     = "dev.nexaflow.site"
+staging_origin_host_header_override = "staging.nexaflow.site"
+create_document_intelligence = false
+create_openai                = false
+tags = {
+  Owner = "platform"
+}
