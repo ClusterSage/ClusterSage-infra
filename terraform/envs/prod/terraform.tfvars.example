@@ -17,6 +17,7 @@ frontdoor_origin_host_name      = "replace-after-kgateway-load-balancer-is-creat
 frontdoor_origin_host_header    = "nexaflow.site"
 create_frontdoor                = true
 frontdoor_custom_domain_names   = ["nexaflow.site", "www.nexaflow.site"]
+argocd_server_service_type      = "LoadBalancer"
 tags = {
   Owner = "platform"
 }

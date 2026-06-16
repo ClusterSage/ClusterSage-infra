@@ -166,8 +166,10 @@ module "kgateway_bootstrap" {
 }
 
 module "argocd_bootstrap" {
-  source  = "../../modules/argocd-bootstrap"
-  enabled = var.bootstrap_argocd
+  source              = "../../modules/argocd-bootstrap"
+  enabled             = var.bootstrap_argocd
+  namespace           = var.argocd_namespace
+  server_service_type = var.argocd_server_service_type
 }
 
 module "frontdoor" {

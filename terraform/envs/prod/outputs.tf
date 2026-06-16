@@ -24,4 +24,6 @@ output "application_insights_connection_string" {
 }
 output "postgres_fqdn" { value = var.create_database ? module.postgres[0].fqdn : null }
 output "kgateway_namespace" { value = var.kgateway_namespace }
+output "argocd_namespace" { value = var.argocd_namespace }
+output "argocd_server_service_type" { value = var.argocd_server_service_type }
 output "platform_namespace" { value = var.platform_namespace }

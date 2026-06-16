@@ -141,6 +141,21 @@ variable "bootstrap_argocd" {
   default = true
 }
 
+variable "argocd_namespace" {
+  type    = string
+  default = "argocd"
+}
+
+variable "argocd_server_service_type" {
+  type    = string
+  default = "LoadBalancer"
+
+  validation {
+    condition     = contains(["ClusterIP", "LoadBalancer"], var.argocd_server_service_type)
+    error_message = "argocd_server_service_type must be either ClusterIP or LoadBalancer."
+  }
+}
+
 variable "frontdoor_origin_host_name" {
   type    = string
   default = ""
