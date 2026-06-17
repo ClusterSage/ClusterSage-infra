@@ -18,3 +18,23 @@ output "kube_config_cluster_ca_certificate" {
   value     = azurerm_kubernetes_cluster.main.kube_config[0].cluster_ca_certificate
   sensitive = true
 }
+
+output "kube_admin_config_host" {
+  value     = try(azurerm_kubernetes_cluster.main.kube_admin_config[0].host, "")
+  sensitive = true
+}
+
+output "kube_admin_config_client_certificate" {
+  value     = try(azurerm_kubernetes_cluster.main.kube_admin_config[0].client_certificate, "")
+  sensitive = true
+}
+
+output "kube_admin_config_client_key" {
+  value     = try(azurerm_kubernetes_cluster.main.kube_admin_config[0].client_key, "")
+  sensitive = true
+}
+
+output "kube_admin_config_cluster_ca_certificate" {
+  value     = try(azurerm_kubernetes_cluster.main.kube_admin_config[0].cluster_ca_certificate, "")
+  sensitive = true
+}

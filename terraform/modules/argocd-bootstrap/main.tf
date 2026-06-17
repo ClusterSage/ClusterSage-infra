@@ -17,3 +17,14 @@ resource "helm_release" "argocd" {
     }
   })]
 }
+
+data "kubernetes_service" "argocd_server" {
+  count = var.enabled ? 1 : 0
+
+  metadata {
+    name      = "argocd-server"
+    namespace = var.namespace
+  }
+
+  depends_on = [helm_release.argocd]
+}

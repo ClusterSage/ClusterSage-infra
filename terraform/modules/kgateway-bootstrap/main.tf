@@ -43,7 +43,7 @@ resource "helm_release" "kgateway_crds" {
   name             = "kgateway-crds"
   namespace        = var.namespace
   create_namespace = true
-  chart            = "oci://cr.kgateway.dev/kgateway-dev/charts/kgateway-crds"
+  chart            = "${path.module}/charts/kgateway-crds"
   version          = var.chart_version
   wait             = true
   timeout          = 600
@@ -61,10 +61,20 @@ resource "helm_release" "kgateway" {
   count     = var.enabled ? 1 : 0
   name      = "kgateway"
   namespace = var.namespace
-  chart     = "oci://cr.kgateway.dev/kgateway-dev/charts/kgateway"
+  chart     = "${path.module}/charts/kgateway"
   version   = var.chart_version
   wait      = true
   timeout   = 600
+
+  set {
+    name  = "image.tag"
+    value = var.chart_version
+  }
+
+  set {
+    name  = "controller.image.tag"
+    value = var.chart_version
+  }
 
   depends_on = [time_sleep.kgateway_crds]
 }

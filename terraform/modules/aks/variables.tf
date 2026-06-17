@@ -6,6 +6,7 @@ variable "log_analytics_workspace_id" { type = string }
 variable "node_count" { type = number }
 variable "vm_size" { type = string }
 variable "tags" { type = map(string) }
+variable "tenant_id" { type = string }
 
 variable "acr_id" {
   type    = string
@@ -24,7 +25,7 @@ variable "private_cluster_enabled" {
 
 variable "local_account_disabled" {
   type    = bool
-  default = true
+  default = false
 }
 
 variable "api_server_authorized_ip_ranges" {

@@ -20,17 +20,17 @@ variable "resource_name_prefix" {
 
 variable "state_resource_group_name" {
   type    = string
-  default = "rg-clustersage-tfstate"
+  default = "terraform-rg"
 }
 
 variable "state_storage_account_name" {
   type    = string
-  default = "stclustersagetfstate"
+  default = "norahterraformstorageacc"
 }
 
 variable "state_container_name" {
   type    = string
-  default = "tfstate"
+  default = "terraformstate"
 }
 
 variable "vnet_address_space" { type = list(string) }
@@ -54,6 +54,11 @@ variable "aks_node_count" {
 variable "aks_vm_size" {
   type    = string
   default = "Standard_D4s_v5"
+}
+
+variable "aks_local_account_disabled" {
+  type    = bool
+  default = false
 }
 
 variable "api_server_authorized_ip_ranges" {
@@ -133,12 +138,12 @@ variable "kgateway_namespace" {
 
 variable "bootstrap_kgateway" {
   type    = bool
-  default = true
+  default = false
 }
 
 variable "bootstrap_argocd" {
   type    = bool
-  default = true
+  default = false
 }
 
 variable "argocd_namespace" {

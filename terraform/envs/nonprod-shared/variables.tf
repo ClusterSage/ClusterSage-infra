@@ -15,17 +15,17 @@ variable "tags" {
 
 variable "state_resource_group_name" {
   type    = string
-  default = "rg-clustersage-tfstate"
+  default = "terraform-rg"
 }
 
 variable "state_storage_account_name" {
   type    = string
-  default = "stclustersagetfstate"
+  default = "norahterraformstorageacc"
 }
 
 variable "state_container_name" {
   type    = string
-  default = "tfstate"
+  default = "terraformstate"
 }
 
 variable "attach_dev_origin" {

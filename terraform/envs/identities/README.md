@@ -1,0 +1,60 @@
+# ClusterSage identities env
+
+This Terraform root creates the shared Microsoft Entra application registration and service principal used by GitHub Actions OIDC across the ClusterSage repositories.
+
+## What you must fill in
+
+Update [terraform.tfvars](./terraform.tfvars) with your real values:
+
+- `subscription_id`: the Azure subscription that owns the ClusterSage shared resources, especially ACR.
+- `tenant_id`: your Microsoft Entra tenant ID.
+- `acr_name`: the existing ACR name from `global-shared`.
+- `acr_resource_group_name`: the resource group that contains that ACR.
+- `acr_abac_enabled`: set to `true` only if `az acr show --query roleAssignmentMode` returns an ABAC-enabled mode.
+
+You can fetch the first two values with:
+
+```powershell
+az account show --query id --output tsv
+az account show --query tenantId --output tsv
+```
+
+Adjust `github_federated_credentials` if:
+
+- your GitHub default branch is not `main`
+- you want additional repos trusted
+- your org or repo names differ from the current `ClusterSage/ClusterSage-*` convention
+
+## Expected backend
+
+This root uses the shared Azure Blob backend:
+
+- resource group: `terraform-rg`
+- storage account: `norahterraformstorageacc`
+- container: `terraformstate`
+- state key: `identities.tfstate`
+
+## Validate locally
+
+```powershell
+cd repos/ClusterSage-infra/terraform/envs/identities
+terraform init
+terraform validate
+terraform plan
+```
+
+`terraform plan` will only succeed after:
+
+- you replace the placeholder values in `terraform.tfvars`
+- you are authenticated to the correct Azure tenant/subscription
+- the referenced global shared ACR already exists
+
+## Useful outputs
+
+After `apply`, use these outputs in GitHub repository variables:
+
+- `github_actions_client_id` -> `AZURE_CLIENT_ID`
+- `azure_tenant_id` -> `AZURE_TENANT_ID`
+- `azure_subscription_id` -> `AZURE_SUBSCRIPTION_ID`
+- `acr_name` -> `ACR_NAME`
+- `acr_login_server` -> `ACR_LOGIN_SERVER`

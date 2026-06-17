@@ -31,6 +31,8 @@ resource "azurerm_cdn_frontdoor_firewall_policy" "main" {
     version = "1.1"
     action  = "Block"
   }
+
+  depends_on = [azurerm_cdn_frontdoor_endpoint.main]
 }
 
 resource "azurerm_cdn_frontdoor_origin_group" "main" {
@@ -51,6 +53,8 @@ resource "azurerm_cdn_frontdoor_origin_group" "main" {
     protocol            = "Http"
     request_type        = "GET"
   }
+
+  depends_on = [azurerm_cdn_frontdoor_endpoint.main]
 }
 
 resource "azurerm_cdn_frontdoor_origin" "main" {
@@ -77,6 +81,8 @@ resource "azurerm_cdn_frontdoor_custom_domain" "main" {
   tls {
     certificate_type = "ManagedCertificate"
   }
+
+  depends_on = [azurerm_cdn_frontdoor_endpoint.main]
 }
 
 resource "azurerm_cdn_frontdoor_route" "main" {

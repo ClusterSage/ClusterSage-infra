@@ -15,9 +15,11 @@ postgres_sku_name               = "GP_Standard_D2s_v3"
 postgres_storage_mb             = 65536
 frontdoor_origin_host_name      = "replace-after-kgateway-load-balancer-is-created"
 frontdoor_origin_host_header    = "nexaflow.site"
-create_frontdoor                = true
+create_frontdoor                = false
 frontdoor_custom_domain_names   = ["nexaflow.site", "www.nexaflow.site"]
 argocd_server_service_type      = "LoadBalancer"
+bootstrap_kgateway             = false
+bootstrap_argocd               = false
 tags = {
   Owner = "platform"
 }

@@ -8,9 +8,16 @@ resource "azurerm_kubernetes_cluster" "main" {
   role_based_access_control_enabled = true
   local_account_disabled            = var.local_account_disabled
   private_cluster_enabled           = var.private_cluster_enabled
-  api_server_authorized_ip_ranges   = var.api_server_authorized_ip_ranges
   sku_tier                          = var.sku_tier
   tags                              = var.tags
+
+  dynamic "api_server_access_profile" {
+    for_each = length(var.api_server_authorized_ip_ranges) > 0 ? [1] : []
+
+    content {
+      authorized_ip_ranges = var.api_server_authorized_ip_ranges
+    }
+  }
 
   default_node_pool {
     name           = "system"
@@ -30,6 +37,7 @@ resource "azurerm_kubernetes_cluster" "main" {
 
   azure_active_directory_role_based_access_control {
     azure_rbac_enabled = var.azure_rbac_enabled
+    tenant_id          = var.tenant_id
   }
 
   oms_agent {

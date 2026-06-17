@@ -60,6 +60,8 @@ module "aks" {
   name                            = "aks-${local.name_prefix}"
   resource_group_name             = module.resource_group.name
   location                        = module.resource_group.location
+  tenant_id                       = data.azurerm_client_config.current.tenant_id
+  local_account_disabled          = var.aks_local_account_disabled
   aks_subnet_id                   = module.networking.aks_subnet_id
   log_analytics_workspace_id      = module.monitoring.log_analytics_workspace_id
   node_count                      = var.aks_node_count

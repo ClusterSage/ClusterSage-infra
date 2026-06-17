@@ -7,17 +7,27 @@ $ErrorActionPreference = "Stop"
 $TerraformDir = Resolve-Path (Join-Path $PSScriptRoot "..")
 $MirrorFullPath = Resolve-Path (Join-Path $TerraformDir $MirrorPath)
 $ConfigPath = Join-Path $TerraformDir ".terraformrc.local"
-$MirrorForTerraform = $MirrorFullPath.Path.Replace("\", "/")
+$MirrorForTerraform = $MirrorFullPath.Path -replace "\\", "/"
+$IncludedProviders = @(
+  "registry.terraform.io/hashicorp/azuread",
+  "registry.terraform.io/hashicorp/azurerm",
+  "registry.terraform.io/hashicorp/helm",
+  "registry.terraform.io/hashicorp/http",
+  "registry.terraform.io/hashicorp/kubernetes",
+  "registry.terraform.io/hashicorp/random",
+  "registry.terraform.io/hashicorp/time"
+)
+$IncludeList = ($IncludedProviders | ForEach-Object { """$_""" }) -join ", "
 
 @"
 provider_installation {
   filesystem_mirror {
     path    = "$MirrorForTerraform"
-    include = ["registry.terraform.io/hashicorp/*"]
+    include = [$IncludeList]
   }
 
   direct {
-    exclude = ["registry.terraform.io/hashicorp/*"]
+    exclude = [$IncludeList]
   }
 }
 "@ | Set-Content -LiteralPath $ConfigPath -NoNewline

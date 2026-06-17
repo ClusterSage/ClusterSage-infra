@@ -3,6 +3,6 @@ terraform {
     resource_group_name  = "terraform-rg"
     storage_account_name = "norahterraformstorageacc"
     container_name       = "terraformstate"
-    key                  = "global-shared.tfstate"
+    key                  = "identities.tfstate"
   }
 }
