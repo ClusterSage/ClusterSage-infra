@@ -191,6 +191,76 @@ variable "frontdoor_custom_domain_names" {
   default = []
 }
 
+variable "ai_foundry_enabled" {
+  type    = bool
+  default = false
+}
+
+variable "ai_foundry_name" {
+  type    = string
+  default = null
+}
+
+variable "ai_foundry_location" {
+  type    = string
+  default = null
+}
+
+variable "ai_model_deployment_name" {
+  type    = string
+  default = "gpt-4.1-mini"
+}
+
+variable "ai_model_name" {
+  type    = string
+  default = "gpt-4.1-mini"
+}
+
+variable "ai_model_version" {
+  type    = string
+  default = ""
+}
+
+variable "ai_model_sku_name" {
+  type    = string
+  default = "Standard"
+}
+
+variable "ai_model_capacity" {
+  type    = number
+  default = 1
+}
+
+variable "ai_foundry_api_version" {
+  type    = string
+  default = "2024-05-01-preview"
+}
+
+variable "ai_prompt_version" {
+  type    = string
+  default = "v1"
+}
+
+variable "ai_store_api_key_in_key_vault" {
+  type    = bool
+  default = false
+}
+
+variable "ai_key_vault_secret_name" {
+  type    = string
+  default = "azure-openai-api-key"
+}
+
+variable "ai_local_auth_enabled" {
+  type    = bool
+  default = true
+}
+
+variable "ai_public_network_access_enabled" {
+  type    = bool
+  default = true
+}
+
 variable "tags" {
   type    = map(string)
   default = {}

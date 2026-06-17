@@ -30,3 +30,12 @@ output "argocd_server_service_name" { value = var.bootstrap_argocd ? module.argo
 output "argocd_server_load_balancer_ip" { value = var.bootstrap_argocd ? module.argocd_bootstrap.server_load_balancer_ip : null }
 output "argocd_server_load_balancer_hostname" { value = var.bootstrap_argocd ? module.argocd_bootstrap.server_load_balancer_hostname : null }
 output "platform_namespace" { value = var.platform_namespace }
+output "ai_foundry_endpoint" { value = var.ai_foundry_enabled ? module.ai_foundry.endpoint : null }
+output "ai_foundry_name" { value = var.ai_foundry_enabled ? module.ai_foundry.name : null }
+output "ai_foundry_deployment_name" { value = var.ai_foundry_enabled ? module.ai_foundry.deployment_name : null }
+output "ai_foundry_api_version" { value = var.ai_foundry_enabled ? var.ai_foundry_api_version : null }
+output "ai_key_vault_secret_name" { value = var.ai_foundry_enabled && var.ai_store_api_key_in_key_vault ? module.ai_foundry.api_key_secret_name : null }
+output "ai_foundry_primary_access_key" {
+  value     = var.ai_foundry_enabled && var.ai_store_api_key_in_key_vault ? module.ai_foundry.primary_access_key : null
+  sensitive = true
+}

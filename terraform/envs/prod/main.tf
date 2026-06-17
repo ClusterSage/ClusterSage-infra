@@ -111,6 +111,28 @@ module "key_vault" {
   tags                = local.tags
 }
 
+module "ai_foundry" {
+  source                                = "../../modules/ai-foundry"
+  enabled                               = var.ai_foundry_enabled
+  name                                  = coalesce(var.ai_foundry_name, "oai-${local.name_prefix}")
+  location                              = coalesce(var.ai_foundry_location, module.resource_group.location)
+  resource_group_name                   = module.resource_group.name
+  custom_subdomain_name                 = coalesce(var.ai_foundry_name, "oai-${local.name_prefix}")
+  deployment_name                       = var.ai_model_deployment_name
+  model_name                            = var.ai_model_name
+  model_version                         = var.ai_model_version
+  account_sku_name                      = "S0"
+  deployment_sku_name                   = var.ai_model_sku_name
+  deployment_capacity                   = var.ai_model_capacity
+  backend_managed_identity_principal_id = module.managed_identity.principal_id
+  key_vault_id                          = module.key_vault.id
+  store_api_key_in_key_vault            = var.ai_store_api_key_in_key_vault
+  key_vault_api_key_secret_name         = var.ai_key_vault_secret_name
+  local_auth_enabled                    = var.ai_local_auth_enabled
+  public_network_access_enabled         = var.ai_public_network_access_enabled
+  tags                                  = local.tags
+}
+
 module "postgres" {
   count                  = var.create_database ? 1 : 0
   source                 = "../../modules/postgres"
