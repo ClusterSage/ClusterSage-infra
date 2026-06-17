@@ -71,6 +71,14 @@ module "aks" {
   tags                            = local.tags
 }
 
+data "azurerm_kubernetes_cluster" "bootstrap" {
+  count               = var.bootstrap_kgateway || var.bootstrap_argocd ? 1 : 0
+  name                = module.aks.aks_name
+  resource_group_name = module.resource_group.name
+
+  depends_on = [module.aks]
+}
+
 module "service_bus" {
   source              = "../../modules/service-bus"
   name_prefix         = local.name_prefix

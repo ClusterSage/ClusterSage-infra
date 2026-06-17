@@ -25,21 +25,25 @@ terraform {
 }
 
 provider "azurerm" {
-  features {}
+  features {
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
+  }
 }
 
 provider "kubernetes" {
-  host                   = module.aks.kube_admin_config_host
-  client_certificate     = base64decode(module.aks.kube_admin_config_client_certificate)
-  client_key             = base64decode(module.aks.kube_admin_config_client_key)
-  cluster_ca_certificate = base64decode(module.aks.kube_admin_config_cluster_ca_certificate)
+  host                   = var.bootstrap_kgateway || var.bootstrap_argocd ? data.azurerm_kubernetes_cluster.bootstrap[0].kube_admin_config[0].host : "https://127.0.0.1"
+  client_certificate     = var.bootstrap_kgateway || var.bootstrap_argocd ? base64decode(data.azurerm_kubernetes_cluster.bootstrap[0].kube_admin_config[0].client_certificate) : ""
+  client_key             = var.bootstrap_kgateway || var.bootstrap_argocd ? base64decode(data.azurerm_kubernetes_cluster.bootstrap[0].kube_admin_config[0].client_key) : ""
+  cluster_ca_certificate = var.bootstrap_kgateway || var.bootstrap_argocd ? base64decode(data.azurerm_kubernetes_cluster.bootstrap[0].kube_admin_config[0].cluster_ca_certificate) : ""
 }
 
 provider "helm" {
   kubernetes {
-    host                   = module.aks.kube_admin_config_host
-    client_certificate     = base64decode(module.aks.kube_admin_config_client_certificate)
-    client_key             = base64decode(module.aks.kube_admin_config_client_key)
-    cluster_ca_certificate = base64decode(module.aks.kube_admin_config_cluster_ca_certificate)
+    host                   = var.bootstrap_kgateway || var.bootstrap_argocd ? data.azurerm_kubernetes_cluster.bootstrap[0].kube_admin_config[0].host : "https://127.0.0.1"
+    client_certificate     = var.bootstrap_kgateway || var.bootstrap_argocd ? base64decode(data.azurerm_kubernetes_cluster.bootstrap[0].kube_admin_config[0].client_certificate) : ""
+    client_key             = var.bootstrap_kgateway || var.bootstrap_argocd ? base64decode(data.azurerm_kubernetes_cluster.bootstrap[0].kube_admin_config[0].client_key) : ""
+    cluster_ca_certificate = var.bootstrap_kgateway || var.bootstrap_argocd ? base64decode(data.azurerm_kubernetes_cluster.bootstrap[0].kube_admin_config[0].cluster_ca_certificate) : ""
   }
 }

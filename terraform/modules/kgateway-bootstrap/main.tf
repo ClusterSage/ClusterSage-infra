@@ -1,11 +1,6 @@
-data "http" "gateway_api_standard_crds" {
-  count = var.enabled ? 1 : 0
-  url   = var.gateway_api_crds_url
-}
-
 locals {
   gateway_api_crd_raw_documents = var.enabled ? [
-    for document in split("\n---", data.http.gateway_api_standard_crds[0].response_body) :
+    for document in split("\n---", file("${path.module}/gateway-api-standard-install.yaml")) :
     document
     if length(regexall("(?m)^apiVersion:", document)) > 0
   ] : []
