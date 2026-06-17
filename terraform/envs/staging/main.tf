@@ -1,13 +1,8 @@
 data "azurerm_client_config" "current" {}
 
-data "terraform_remote_state" "global_shared" {
-  backend = "azurerm"
-  config = {
-    resource_group_name  = var.state_resource_group_name
-    storage_account_name = var.state_storage_account_name
-    container_name       = var.state_container_name
-    key                  = "global-shared.tfstate"
-  }
+data "azurerm_container_registry" "global_shared" {
+  name                = var.acr_name
+  resource_group_name = var.acr_resource_group_name
 }
 
 locals {
@@ -66,7 +61,7 @@ module "aks" {
   log_analytics_workspace_id      = module.monitoring.log_analytics_workspace_id
   node_count                      = var.aks_node_count
   vm_size                         = var.aks_vm_size
-  acr_id                          = data.terraform_remote_state.global_shared.outputs.acr_id
+  acr_id                          = data.azurerm_container_registry.global_shared.id
   api_server_authorized_ip_ranges = var.api_server_authorized_ip_ranges
   tags                            = local.tags
 }

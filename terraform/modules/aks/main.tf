@@ -44,6 +44,10 @@ resource "azurerm_kubernetes_cluster" "main" {
     log_analytics_workspace_id = var.log_analytics_workspace_id
   }
 
+  key_vault_secrets_provider {
+    secret_rotation_enabled = true
+  }
+
   lifecycle {
     ignore_changes = [
       default_node_pool[0].upgrade_settings,

@@ -33,6 +33,16 @@ variable "state_container_name" {
   default = "terraformstate"
 }
 
+variable "acr_name" {
+  type    = string
+  default = "acrclustersage"
+}
+
+variable "acr_resource_group_name" {
+  type    = string
+  default = "rg-clustersage-global"
+}
+
 variable "vnet_address_space" { type = list(string) }
 variable "aks_subnet_prefix" { type = list(string) }
 

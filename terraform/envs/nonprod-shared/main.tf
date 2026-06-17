@@ -22,6 +22,7 @@ data "terraform_remote_state" "dev" {
     storage_account_name = var.state_storage_account_name
     container_name       = var.state_container_name
     key                  = "dev.tfstate"
+    use_azuread_auth     = true
   }
 }
 
@@ -33,6 +34,7 @@ data "terraform_remote_state" "staging" {
     storage_account_name = var.state_storage_account_name
     container_name       = var.state_container_name
     key                  = "staging.tfstate"
+    use_azuread_auth     = true
   }
 }
 

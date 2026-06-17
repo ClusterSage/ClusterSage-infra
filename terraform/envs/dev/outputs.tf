@@ -1,6 +1,6 @@
 output "resource_group_name" { value = module.resource_group.name }
 output "aks_name" { value = module.aks.aks_name }
-output "acr_login_server" { value = data.terraform_remote_state.global_shared.outputs.acr_login_server }
+output "acr_login_server" { value = data.azurerm_container_registry.global_shared.login_server }
 output "vnet_id" { value = module.networking.vnet_id }
 output "aks_subnet_id" { value = module.networking.aks_subnet_id }
 output "frontdoor_origin_host_name" { value = var.frontdoor_origin_host_name }
