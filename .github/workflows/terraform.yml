@@ -18,6 +18,7 @@ on:
         required: true
         type: choice
         options:
+          - identities
           - global-shared
           - nonprod-shared
           - dev
@@ -52,14 +53,14 @@ jobs:
       - run: terraform fmt -check -recursive
         working-directory: terraform
 
-  plan:
+  validate:
     if: github.event_name != 'workflow_dispatch'
     needs: fmt
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        environment: [global-shared, nonprod-shared, dev, staging, prod]
+        environment: [identities, global-shared, nonprod-shared, dev, staging, prod]
     defaults:
       run:
         working-directory: terraform/envs/${{ matrix.environment }}
@@ -80,15 +81,44 @@ jobs:
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.12.2
-      - run: terraform init
+      - run: terraform init -backend=false -reconfigure
       - run: terraform validate
-      - run: terraform plan -var-file=terraform.tfvars.example -out=tfplan
+
+  speculative-plan:
+    if: github.event_name != 'workflow_dispatch'
+    needs: validate
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: [global-shared, nonprod-shared]
+    defaults:
+      run:
+        working-directory: terraform/envs/${{ matrix.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Azure workflow configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          [ -n "${ARM_CLIENT_ID}" ] || { echo "Missing AZURE_CLIENT_ID. Add it as an org/repo secret or variable."; exit 1; }
+          [ -n "${ARM_TENANT_ID}" ] || { echo "Missing AZURE_TENANT_ID. Add it as an org/repo secret or variable."; exit 1; }
+          [ -n "${ARM_SUBSCRIPTION_ID}" ] || { echo "Missing AZURE_SUBSCRIPTION_ID. Add it as an org/repo secret or variable."; exit 1; }
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ env.ARM_CLIENT_ID }}
+          tenant-id: ${{ env.ARM_TENANT_ID }}
+          subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.12.2
+      - run: terraform init -backend=false -reconfigure
+      - run: terraform plan -refresh=false -lock=false -var-file=terraform.tfvars.example
 
   apply:
     if: github.event_name == 'workflow_dispatch' && inputs.apply
     needs: fmt
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
     defaults:
       run:
         working-directory: terraform/envs/${{ inputs.environment }}
