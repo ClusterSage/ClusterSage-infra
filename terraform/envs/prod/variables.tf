@@ -61,6 +61,21 @@ variable "aks_node_count" {
   default = 2
 }
 
+variable "aks_auto_scaling_enabled" {
+  type    = bool
+  default = false
+}
+
+variable "aks_min_count" {
+  type    = number
+  default = null
+}
+
+variable "aks_max_count" {
+  type    = number
+  default = null
+}
+
 variable "aks_vm_size" {
   type    = string
   default = "Standard_D4s_v5"

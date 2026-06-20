@@ -11,7 +11,7 @@ resource "azurerm_cognitive_account" "document_intelligence" {
 resource "azurerm_cognitive_account" "openai" {
   count               = var.create_openai ? 1 : 0
   name                = var.openai_name
-  location            = var.location
+  location            = coalesce(var.openai_location, var.location)
   resource_group_name = var.resource_group_name
   kind                = "OpenAI"
   sku_name            = var.openai_sku_name

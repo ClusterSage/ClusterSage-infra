@@ -6,6 +6,7 @@ aks_subnet_prefix               = ["10.42.0.0/22"]
 private_endpoint_subnet_prefix  = ["10.42.10.0/24"]
 management_subnet_prefix        = ["10.42.30.0/24"]
 aks_node_count                  = 2
+aks_auto_scaling_enabled        = false
 aks_vm_size                     = "Standard_D4s_v5"
 api_server_authorized_ip_ranges = []
 postgres_server_name            = "pg-clustersage-prod"

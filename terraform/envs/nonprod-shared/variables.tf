@@ -63,6 +63,16 @@ variable "custom_domain_names" {
   default = []
 }
 
+variable "dev_custom_domain_name" {
+  type    = string
+  default = "dev.nexaflow.site"
+}
+
+variable "stage_custom_domain_name" {
+  type    = string
+  default = "stage.nexaflow.site"
+}
+
 variable "create_document_intelligence" {
   type    = bool
   default = false
@@ -71,4 +81,9 @@ variable "create_document_intelligence" {
 variable "create_openai" {
   type    = bool
   default = false
+}
+
+variable "openai_location" {
+  type    = string
+  default = null
 }

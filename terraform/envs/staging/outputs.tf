@@ -24,4 +24,9 @@ output "application_insights_connection_string" {
 }
 output "postgres_fqdn" { value = var.create_database ? module.postgres[0].fqdn : null }
 output "kgateway_namespace" { value = var.kgateway_namespace }
+output "argocd_namespace" { value = var.argocd_namespace }
+output "argocd_server_service_type" { value = var.argocd_server_service_type }
+output "argocd_server_service_name" { value = var.bootstrap_argocd ? module.argocd_bootstrap.server_service_name : null }
+output "argocd_server_load_balancer_ip" { value = var.bootstrap_argocd ? module.argocd_bootstrap.server_load_balancer_ip : null }
+output "argocd_server_load_balancer_hostname" { value = var.bootstrap_argocd ? module.argocd_bootstrap.server_load_balancer_hostname : null }
 output "platform_namespace" { value = var.platform_namespace }

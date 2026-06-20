@@ -12,7 +12,8 @@ locals {
     Environment = var.environment
     ManagedBy   = "Terraform"
   })
-  origin_host_header = var.frontdoor_origin_host_header != "" ? var.frontdoor_origin_host_header : var.frontdoor_origin_host_name
+  origin_host_header     = var.frontdoor_origin_host_header != "" ? var.frontdoor_origin_host_header : var.frontdoor_origin_host_name
+  frontdoor_origin_ready = var.frontdoor_origin_host_name != "" && var.frontdoor_origin_host_name != "replace-after-kgateway-load-balancer-is-created"
 }
 
 module "resource_group" {
@@ -60,6 +61,9 @@ module "aks" {
   aks_subnet_id                   = module.networking.aks_subnet_id
   log_analytics_workspace_id      = module.monitoring.log_analytics_workspace_id
   node_count                      = var.aks_node_count
+  auto_scaling_enabled            = var.aks_auto_scaling_enabled
+  min_count                       = var.aks_min_count
+  max_count                       = var.aks_max_count
   vm_size                         = var.aks_vm_size
   acr_id                          = data.azurerm_container_registry.global_shared.id
   api_server_authorized_ip_ranges = var.api_server_authorized_ip_ranges
@@ -164,6 +168,12 @@ resource "azurerm_role_assignment" "keyvault_current_user" {
   principal_id         = coalesce(var.key_vault_secrets_officer_principal_id, data.azurerm_client_config.current.object_id)
 }
 
+resource "azurerm_role_assignment" "keyvault_workload_reader" {
+  scope                = module.key_vault.id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = module.managed_identity.principal_id
+}
+
 module "kgateway_bootstrap" {
   source    = "../../modules/kgateway-bootstrap"
   enabled   = var.bootstrap_kgateway
@@ -171,42 +181,44 @@ module "kgateway_bootstrap" {
 }
 
 module "argocd_bootstrap" {
-  source  = "../../modules/argocd-bootstrap"
-  enabled = var.bootstrap_argocd
+  source              = "../../modules/argocd-bootstrap"
+  enabled             = var.bootstrap_argocd
+  namespace           = var.argocd_namespace
+  server_service_type = var.argocd_server_service_type
 }
 
 module "frontdoor" {
-  count               = var.create_frontdoor && var.frontdoor_origin_host_name != "" ? 1 : 0
+  count               = var.create_frontdoor ? 1 : 0
   source              = "../../modules/frontdoor"
   name_prefix         = local.name_prefix
   resource_group_name = module.resource_group.name
   sku_name            = "Premium_AzureFrontDoor"
   tags                = local.tags
 
-  origin_groups = {
+  origin_groups = local.frontdoor_origin_ready ? {
     prod = {
       health_probe_path = "/health"
     }
-  }
+  } : {}
 
-  origins = {
+  origins = local.frontdoor_origin_ready ? {
     prod = {
       origin_group_name = "prod"
       host_name         = var.frontdoor_origin_host_name
       host_header       = local.origin_host_header
     }
-  }
+  } : {}
 
   custom_domains = {
     for domain_name in var.frontdoor_custom_domain_names : domain_name => {}
   }
 
-  routes = {
+  routes = local.frontdoor_origin_ready ? {
     route-all = {
       origin_group_name   = "prod"
       origin_names        = ["prod"]
       patterns_to_match   = ["/*"]
       custom_domain_names = var.frontdoor_custom_domain_names
     }
-  }
+  } : {}
 }

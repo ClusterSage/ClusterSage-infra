@@ -61,6 +61,9 @@ module "aks" {
   aks_subnet_id                   = module.networking.aks_subnet_id
   log_analytics_workspace_id      = module.monitoring.log_analytics_workspace_id
   node_count                      = var.aks_node_count
+  auto_scaling_enabled            = var.aks_auto_scaling_enabled
+  min_count                       = var.aks_min_count
+  max_count                       = var.aks_max_count
   vm_size                         = var.aks_vm_size
   acr_id                          = data.azurerm_container_registry.global_shared.id
   api_server_authorized_ip_ranges = var.api_server_authorized_ip_ranges

@@ -61,9 +61,24 @@ variable "aks_node_count" {
   default = 2
 }
 
+variable "aks_auto_scaling_enabled" {
+  type    = bool
+  default = true
+}
+
+variable "aks_min_count" {
+  type    = number
+  default = 1
+}
+
+variable "aks_max_count" {
+  type    = number
+  default = 2
+}
+
 variable "aks_vm_size" {
   type    = string
-  default = "Standard_D4s_v5"
+  default = "Standard_D2s_v3"
 }
 
 variable "aks_local_account_disabled" {
@@ -154,6 +169,21 @@ variable "bootstrap_kgateway" {
 variable "bootstrap_argocd" {
   type    = bool
   default = false
+}
+
+variable "argocd_namespace" {
+  type    = string
+  default = "argocd"
+}
+
+variable "argocd_server_service_type" {
+  type    = string
+  default = "LoadBalancer"
+
+  validation {
+    condition     = contains(["ClusterIP", "LoadBalancer"], var.argocd_server_service_type)
+    error_message = "argocd_server_service_type must be either ClusterIP or LoadBalancer."
+  }
 }
 
 variable "frontdoor_origin_host_name" {

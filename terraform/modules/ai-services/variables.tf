@@ -22,6 +22,11 @@ variable "create_openai" {
   default = false
 }
 
+variable "openai_location" {
+  type    = string
+  default = null
+}
+
 variable "openai_name" {
   type    = string
   default = ""
