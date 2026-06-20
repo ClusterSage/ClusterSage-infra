@@ -23,6 +23,8 @@ output "application_insights_connection_string" {
   sensitive = true
 }
 output "postgres_fqdn" { value = var.create_database ? module.postgres[0].fqdn : null }
+output "postgres_replica_fqdn" { value = var.create_database ? module.postgres[0].replica_fqdn : null }
+output "aks_user_node_pool_id" { value = module.aks.user_node_pool_id }
 output "kgateway_namespace" { value = var.kgateway_namespace }
 output "argocd_namespace" { value = var.argocd_namespace }
 output "argocd_server_service_type" { value = var.argocd_server_service_type }

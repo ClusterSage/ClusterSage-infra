@@ -65,6 +65,13 @@ module "aks" {
   min_count                       = var.aks_min_count
   max_count                       = var.aks_max_count
   vm_size                         = var.aks_vm_size
+  user_node_pool_enabled          = var.aks_user_node_pool_enabled
+  user_node_count                 = var.aks_user_node_count
+  user_auto_scaling_enabled       = var.aks_user_node_pool_enabled
+  user_min_count                  = var.aks_user_min_count
+  user_max_count                  = var.aks_user_max_count
+  user_vm_size                    = var.aks_user_vm_size
+  user_node_labels                = { "workload" = "user" }
   acr_id                          = data.azurerm_container_registry.global_shared.id
   api_server_authorized_ip_ranges = var.api_server_authorized_ip_ranges
   tags                            = local.tags
@@ -127,6 +134,9 @@ module "postgres" {
   administrator_password = var.postgres_admin_password
   sku_name               = var.postgres_sku_name
   storage_mb             = var.postgres_storage_mb
+  create_replica         = var.postgres_create_replica
+  replica_name           = var.postgres_replica_name
+  replica_location       = var.postgres_replica_location
   tags                   = local.tags
 }
 

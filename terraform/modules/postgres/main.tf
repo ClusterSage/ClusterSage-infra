@@ -15,6 +15,26 @@ resource "azurerm_postgresql_flexible_server" "main" {
   }
 }
 
+resource "azurerm_postgresql_flexible_server" "replica" {
+  count = var.create_replica ? 1 : 0
+
+  name                   = coalesce(var.replica_name, "${coalesce(var.server_name, "pg-${var.name_prefix}")}-dr")
+  resource_group_name    = var.resource_group_name
+  location               = coalesce(var.replica_location, var.location)
+  version                = "16"
+  administrator_login    = var.administrator_login
+  administrator_password = var.administrator_password
+  storage_mb             = var.storage_mb
+  sku_name               = var.sku_name
+  create_mode            = "Replica"
+  source_server_id       = azurerm_postgresql_flexible_server.main.id
+  tags                   = var.tags
+
+  lifecycle {
+    ignore_changes = [zone]
+  }
+}
+
 resource "azurerm_postgresql_flexible_server_database" "main" {
   name      = var.database_name
   server_id = azurerm_postgresql_flexible_server.main.id

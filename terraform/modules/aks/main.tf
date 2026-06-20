@@ -58,6 +58,23 @@ resource "azurerm_kubernetes_cluster" "main" {
   }
 }
 
+resource "azurerm_kubernetes_cluster_node_pool" "user" {
+  count = var.user_node_pool_enabled ? 1 : 0
+
+  name                  = var.user_node_pool_name
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.main.id
+  vm_size               = coalesce(var.user_vm_size, var.vm_size)
+  mode                  = "User"
+  vnet_subnet_id        = var.aks_subnet_id
+  node_count            = var.user_auto_scaling_enabled ? null : var.user_node_count
+  auto_scaling_enabled  = var.user_auto_scaling_enabled
+  min_count             = var.user_auto_scaling_enabled ? var.user_min_count : null
+  max_count             = var.user_auto_scaling_enabled ? var.user_max_count : null
+  node_labels           = var.user_node_labels
+  node_taints           = length(var.user_node_taints) > 0 ? var.user_node_taints : null
+  tags                  = var.tags
+}
+
 resource "azurerm_role_assignment" "acr_pull" {
   count                = var.acr_id == "" ? 0 : 1
   scope                = var.acr_id

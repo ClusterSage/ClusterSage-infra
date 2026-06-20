@@ -81,6 +81,31 @@ variable "aks_vm_size" {
   default = "Standard_D2s_v3"
 }
 
+variable "aks_user_node_pool_enabled" {
+  type    = bool
+  default = false
+}
+
+variable "aks_user_node_count" {
+  type    = number
+  default = 1
+}
+
+variable "aks_user_min_count" {
+  type    = number
+  default = 1
+}
+
+variable "aks_user_max_count" {
+  type    = number
+  default = 2
+}
+
+variable "aks_user_vm_size" {
+  type    = string
+  default = "Standard_D2s_v3"
+}
+
 variable "aks_local_account_disabled" {
   type    = bool
   default = false
@@ -119,6 +144,21 @@ variable "postgres_sku_name" {
 variable "postgres_storage_mb" {
   type    = number
   default = 32768
+}
+
+variable "postgres_create_replica" {
+  type    = bool
+  default = false
+}
+
+variable "postgres_replica_name" {
+  type    = string
+  default = null
+}
+
+variable "postgres_replica_location" {
+  type    = string
+  default = null
 }
 
 variable "create_database" {

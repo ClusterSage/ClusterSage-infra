@@ -15,6 +15,14 @@ Terraform provisions Azure infrastructure and platform bootstrap components only
 
 The old production Docker Compose deployment path was retired in favor of AKS, Helm, and GitOps.
 
+Current env roots can now express, per environment:
+
+- autoscaled AKS system-pool sizing
+- an optional separate AKS user node pool
+- an optional cross-region PostgreSQL flexible-server read replica for disaster recovery
+
+These remain normal Terraform-managed infrastructure changes and still require reviewed plans and explicit approval before apply, especially for production.
+
 ## Safe apply/destroy
 
 For environments that create AKS and then bootstrap in-cluster components such as Argo CD and kgateway, use the wrapper scripts instead of a single raw Terraform command from an empty or fully-populated state:

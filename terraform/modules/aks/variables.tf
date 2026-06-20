@@ -49,6 +49,75 @@ variable "max_count" {
   }
 }
 
+variable "user_node_pool_enabled" {
+  type    = bool
+  default = false
+}
+
+variable "user_node_pool_name" {
+  type    = string
+  default = "user"
+}
+
+variable "user_node_count" {
+  type    = number
+  default = 1
+
+  validation {
+    condition     = var.user_node_count >= 1
+    error_message = "user_node_count must be at least 1."
+  }
+}
+
+variable "user_auto_scaling_enabled" {
+  type    = bool
+  default = false
+
+  validation {
+    condition = (
+      var.user_auto_scaling_enabled ?
+      (var.user_min_count != null && var.user_max_count != null && var.user_max_count >= var.user_min_count) :
+      true
+    )
+    error_message = "When user_auto_scaling_enabled is true, user_min_count and user_max_count must both be set and user_max_count must be greater than or equal to user_min_count."
+  }
+}
+
+variable "user_min_count" {
+  type    = number
+  default = null
+
+  validation {
+    condition     = var.user_min_count == null || var.user_min_count >= 1
+    error_message = "user_min_count must be null or at least 1."
+  }
+}
+
+variable "user_max_count" {
+  type    = number
+  default = null
+
+  validation {
+    condition     = var.user_max_count == null || var.user_max_count >= 1
+    error_message = "user_max_count must be null or at least 1."
+  }
+}
+
+variable "user_vm_size" {
+  type    = string
+  default = null
+}
+
+variable "user_node_labels" {
+  type    = map(string)
+  default = {}
+}
+
+variable "user_node_taints" {
+  type    = list(string)
+  default = []
+}
+
 variable "acr_id" {
   type    = string
   default = ""

@@ -14,3 +14,18 @@ variable "administrator_password" {
 variable "sku_name" { type = string }
 variable "storage_mb" { type = number }
 variable "tags" { type = map(string) }
+
+variable "create_replica" {
+  type    = bool
+  default = false
+}
+
+variable "replica_name" {
+  type    = string
+  default = null
+}
+
+variable "replica_location" {
+  type    = string
+  default = null
+}
