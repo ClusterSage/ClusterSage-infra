@@ -84,18 +84,23 @@ jobs:
           echo 'has_envs=true' >> "$GITHUB_OUTPUT"
 
   fmt:
+    needs: detect-envs
+    if: needs.detect-envs.outputs.has_envs == 'true'
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: ${{ fromJson(needs.detect-envs.outputs.envs) }}
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
       - run: terraform fmt -check -recursive
-        working-directory: ${{ env.TERRAFORM_ROOT }}
+        working-directory: ${{ env.TERRAFORM_ROOT }}/envs/${{ matrix.environment }}
 
   plan:
     needs:
-      - detect-envs
       - fmt
     if: needs.detect-envs.outputs.has_envs == 'true'
     runs-on: ubuntu-latest
