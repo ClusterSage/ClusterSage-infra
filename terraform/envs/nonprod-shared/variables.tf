@@ -110,5 +110,5 @@ variable "openai_deployment_sku_name" {
 
 variable "openai_deployment_capacity" {
   type    = number
-  default = 1
+  default = 10
 }
