@@ -101,6 +101,7 @@ jobs:
 
   plan:
     needs:
+      - detect-envs
       - fmt
     if: needs.detect-envs.outputs.has_envs == 'true'
     runs-on: ubuntu-latest
