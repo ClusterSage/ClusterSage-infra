@@ -117,6 +117,10 @@ variable "github_federated_credentials" {
       subject     = "repo:ClusterSage/ClusterSage-infra:ref:refs/heads/main"
       description = "Allows non-deployment validation from the ClusterSage infra main branch."
     }
+    infra_pull_request = {
+      subject     = "repo:ClusterSage/ClusterSage-infra:pull_request"
+      description = "Allows ClusterSage infra pull request workflows to use Azure OIDC."
+    }
     docs_main = {
       subject     = "repo:ClusterSage/ClusterSage-docs:ref:refs/heads/main"
       description = "Allows the ClusterSage docs repository main branch to access Azure when required."
