@@ -3,7 +3,7 @@ variable "project_name" {
   default = "clustersage"
 }
 
-# Global shared stays intentionally small so pipeline targeting is easy to verify.
+# Global shared stays intentionally small so pipeline targeting is easy to verify in PR runs.
 variable "location" {
   type    = string
   default = "Central India"
