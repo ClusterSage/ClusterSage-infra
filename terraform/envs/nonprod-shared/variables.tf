@@ -5,12 +5,14 @@ variable "project_name" {
 
 variable "location" {
   type    = string
-  default = "eastus"
+  default = "Central India"
 }
 
 variable "tags" {
-  type    = map(string)
-  default = {}
+  type = map(string)
+  default = {
+    Owner = "platform"
+  }
 }
 
 variable "state_resource_group_name" {
@@ -40,12 +42,12 @@ variable "attach_staging_origin" {
 
 variable "dev_origin_host_name_override" {
   type    = string
-  default = ""
+  default = "4.224.190.164"
 }
 
 variable "dev_origin_host_header_override" {
   type    = string
-  default = ""
+  default = "dev.nexaflow.site"
 }
 
 variable "staging_origin_host_name_override" {
@@ -55,12 +57,12 @@ variable "staging_origin_host_name_override" {
 
 variable "staging_origin_host_header_override" {
   type    = string
-  default = ""
+  default = "stage.nexaflow.site"
 }
 
 variable "custom_domain_names" {
   type    = list(string)
-  default = []
+  default = ["dev.nexaflow.site", "stage.nexaflow.site"]
 }
 
 variable "dev_custom_domain_name" {
@@ -75,17 +77,17 @@ variable "stage_custom_domain_name" {
 
 variable "create_document_intelligence" {
   type    = bool
-  default = false
+  default = true
 }
 
 variable "create_openai" {
   type    = bool
-  default = false
+  default = true
 }
 
 variable "openai_location" {
   type    = string
-  default = null
+  default = "eastus"
 }
 
 variable "openai_deployment_name" {

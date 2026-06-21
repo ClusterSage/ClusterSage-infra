@@ -5,12 +5,12 @@ variable "project_name" {
 
 variable "location" {
   type    = string
-  default = "eastus"
+  default = "Central India"
 }
 
 variable "acr_name" {
   type    = string
-  default = "acrclustersagexxxxx"
+  default = "acrclustersage"
 }
 
 variable "acr_anonymous_pull_enabled" {
@@ -19,6 +19,8 @@ variable "acr_anonymous_pull_enabled" {
 }
 
 variable "tags" {
-  type    = map(string)
-  default = {}
+  type = map(string)
+  default = {
+    Owner = "platform"
+  }
 }

@@ -10,7 +10,7 @@ variable "environment" {
 
 variable "location" {
   type    = string
-  default = "eastus"
+  default = "Central India"
 }
 
 variable "resource_name_prefix" {
@@ -43,22 +43,68 @@ variable "acr_resource_group_name" {
   default = "rg-clustersage-global"
 }
 
-variable "vnet_address_space" { type = list(string) }
-variable "aks_subnet_prefix" { type = list(string) }
+variable "vnet_address_space" {
+  type    = list(string)
+  default = ["10.44.0.0/16"]
+}
+variable "aks_subnet_prefix" {
+  type    = list(string)
+  default = ["10.44.0.0/23"]
+}
 
 variable "private_endpoint_subnet_prefix" {
   type    = list(string)
-  default = []
+  default = ["10.44.10.0/24"]
+}
+
+variable "enable_private_endpoints" {
+  type    = bool
+  default = true
+}
+
+variable "enable_private_endpoint_key_vault" {
+  type    = bool
+  default = true
+}
+
+variable "enable_private_endpoint_postgres" {
+  type    = bool
+  default = true
+}
+
+variable "enable_private_endpoint_storage_blob" {
+  type    = bool
+  default = true
+}
+
+variable "key_vault_public_network_access_enabled" {
+  type    = bool
+  default = false
+}
+
+variable "postgres_public_network_access_enabled" {
+  type    = bool
+  default = false
+}
+
+variable "postgres_create_azure_services_firewall_rule" {
+  type    = bool
+  default = false
+}
+
+variable "storage_public_network_access_enabled" {
+  type    = bool
+  default = false
 }
 
 variable "management_subnet_prefix" {
   type    = list(string)
-  default = []
+  default = ["10.44.30.0/24"]
 }
 
 variable "aks_node_count" {
   type    = number
-  default = 2
+  default = 1
 }
 
 variable "aks_auto_scaling_enabled" {
@@ -83,7 +129,7 @@ variable "aks_vm_size" {
 
 variable "aks_user_node_pool_enabled" {
   type    = bool
-  default = false
+  default = true
 }
 
 variable "aks_user_node_count" {
@@ -128,7 +174,7 @@ variable "postgres_admin_password" {
 
 variable "postgres_server_name" {
   type    = string
-  default = null
+  default = "pg-clustersage-dev"
 }
 
 variable "postgres_database_name" {
@@ -138,7 +184,7 @@ variable "postgres_database_name" {
 
 variable "postgres_sku_name" {
   type    = string
-  default = "B_Standard_B2s"
+  default = "GP_Standard_D2s_v3"
 }
 
 variable "postgres_storage_mb" {
@@ -148,17 +194,17 @@ variable "postgres_storage_mb" {
 
 variable "postgres_create_replica" {
   type    = bool
-  default = false
+  default = true
 }
 
 variable "postgres_replica_name" {
   type    = string
-  default = null
+  default = "pg-clustersage-dev-dr"
 }
 
 variable "postgres_replica_location" {
   type    = string
-  default = null
+  default = "South India"
 }
 
 variable "create_database" {
@@ -188,7 +234,7 @@ variable "key_vault_secrets_officer_principal_id" {
 
 variable "key_vault_name" {
   type    = string
-  default = null
+  default = "kvclustersagedev01"
 }
 
 variable "platform_namespace" {
@@ -238,7 +284,7 @@ variable "frontdoor_origin_host_name" {
 
 variable "frontdoor_origin_host_header" {
   type    = string
-  default = ""
+  default = "dev.nexaflow.site"
 }
 
 variable "create_frontdoor" {
@@ -252,6 +298,8 @@ variable "frontdoor_custom_domain_names" {
 }
 
 variable "tags" {
-  type    = map(string)
-  default = {}
+  type = map(string)
+  default = {
+    Owner = "platform"
+  }
 }

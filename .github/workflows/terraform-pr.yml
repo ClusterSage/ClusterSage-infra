@@ -1,0 +1,168 @@
+name: Terraform PR
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "terraform/**"
+      - ".github/workflows/terraform-*.yml"
+
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+  security-events: write
+
+env:
+  TERRAFORM_VERSION: "1.12.2"
+  TERRAFORM_ROOT: terraform
+  TF_IN_AUTOMATION: "true"
+  TF_INPUT: "false"
+
+jobs:
+  detect-envs:
+    runs-on: ubuntu-latest
+    outputs:
+      envs: ${{ steps.detect.outputs.envs }}
+      has_envs: ${{ steps.detect.outputs.has_envs }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: detect
+        shell: bash
+        run: |
+          set -euo pipefail
+          changed_files="$(git diff --name-only '${{ github.event.pull_request.base.sha }}' '${{ github.event.pull_request.head.sha }}')"
+          envs=()
+
+          add_env() {
+            local env_name="$1"
+            for existing in "${envs[@]:-}"; do
+              if [ "$existing" = "$env_name" ]; then
+                return
+              fi
+            done
+            envs+=("$env_name")
+          }
+
+          while IFS= read -r file; do
+            [ -z "$file" ] && continue
+            case "$file" in
+              terraform/modules/*|terraform/scripts/*|terraform/README.md|terraform/PROVIDER_MIRROR.md)
+                for env_name in identities global-shared nonprod-shared dev staging prod; do
+                  add_env "$env_name"
+                done
+                ;;
+              terraform/envs/*)
+                remainder="${file#terraform/envs/}"
+                env_name="${remainder%%/*}"
+                case "$env_name" in
+                  identities|global-shared|nonprod-shared|dev|staging|prod)
+                    add_env "$env_name"
+                    ;;
+                esac
+                ;;
+            esac
+          done <<< "$changed_files"
+
+          if [ "${#envs[@]}" -eq 0 ]; then
+            echo 'envs=[]' >> "$GITHUB_OUTPUT"
+            echo 'has_envs=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          json="["
+          for i in "${!envs[@]}"; do
+            [ "$i" -gt 0 ] && json+=","
+            json+="\"${envs[$i]}\""
+          done
+          json+="]"
+
+          echo "envs=${json}" >> "$GITHUB_OUTPUT"
+          echo 'has_envs=true' >> "$GITHUB_OUTPUT"
+
+  fmt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+      - run: terraform fmt -check -recursive
+        working-directory: ${{ env.TERRAFORM_ROOT }}
+
+  plan:
+    needs:
+      - detect-envs
+      - fmt
+    if: needs.detect-envs.outputs.has_envs == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: ${{ fromJson(needs.detect-envs.outputs.envs) }}
+    env:
+      ARM_USE_OIDC: "true"
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID != '' && secrets.AZURE_CLIENT_ID || vars.AZURE_CLIENT_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID != '' && secrets.AZURE_TENANT_ID || vars.AZURE_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID != '' && secrets.AZURE_SUBSCRIPTION_ID || vars.AZURE_SUBSCRIPTION_ID }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ env.TERRAFORM_ROOT }}/envs/${{ matrix.environment }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate Azure workflow configuration
+        run: |
+          set -euo pipefail
+          [ -n "${ARM_CLIENT_ID}" ] || { echo "Missing AZURE_CLIENT_ID."; exit 1; }
+          [ -n "${ARM_TENANT_ID}" ] || { echo "Missing AZURE_TENANT_ID."; exit 1; }
+          [ -n "${ARM_SUBSCRIPTION_ID}" ] || { echo "Missing AZURE_SUBSCRIPTION_ID."; exit 1; }
+
+      - name: Select root-specific secrets
+        env:
+          POSTGRES_PASSWORD_DEV: ${{ secrets.TF_VAR_POSTGRES_ADMIN_PASSWORD_DEV }}
+          POSTGRES_PASSWORD_STAGING: ${{ secrets.TF_VAR_POSTGRES_ADMIN_PASSWORD_STAGING }}
+          POSTGRES_PASSWORD_PROD: ${{ secrets.TF_VAR_POSTGRES_ADMIN_PASSWORD_PROD }}
+        run: |
+          set -euo pipefail
+          case "${{ matrix.environment }}" in
+            dev)
+              [ -n "${POSTGRES_PASSWORD_DEV}" ] || { echo "Missing TF_VAR_POSTGRES_ADMIN_PASSWORD_DEV."; exit 1; }
+              echo "TF_VAR_postgres_admin_password=${POSTGRES_PASSWORD_DEV}" >> "$GITHUB_ENV"
+              ;;
+            staging)
+              [ -n "${POSTGRES_PASSWORD_STAGING}" ] || { echo "Missing TF_VAR_POSTGRES_ADMIN_PASSWORD_STAGING."; exit 1; }
+              echo "TF_VAR_postgres_admin_password=${POSTGRES_PASSWORD_STAGING}" >> "$GITHUB_ENV"
+              ;;
+            prod)
+              [ -n "${POSTGRES_PASSWORD_PROD}" ] || { echo "Missing TF_VAR_POSTGRES_ADMIN_PASSWORD_PROD."; exit 1; }
+              echo "TF_VAR_postgres_admin_password=${POSTGRES_PASSWORD_PROD}" >> "$GITHUB_ENV"
+              ;;
+          esac
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ env.ARM_CLIENT_ID }}
+          tenant-id: ${{ env.ARM_TENANT_ID }}
+          subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - run: terraform init -backend=false -reconfigure
+      - run: terraform validate
+      - run: terraform init
+      - run: terraform plan -out=tfplan
+      - run: terraform show -no-color tfplan > tfplan.txt
+
+      - name: Upload PR plan text
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-tfplan-text-${{ matrix.environment }}-${{ github.event.pull_request.head.sha }}-${{ github.run_id }}
+          path: terraform/envs/${{ matrix.environment }}/tfplan.txt
+          retention-days: 3

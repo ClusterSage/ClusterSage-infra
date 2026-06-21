@@ -10,7 +10,7 @@ variable "environment" {
 
 variable "location" {
   type    = string
-  default = "eastus"
+  default = "Central India"
 }
 
 variable "resource_name_prefix" {
@@ -43,17 +43,68 @@ variable "acr_resource_group_name" {
   default = "rg-clustersage-global"
 }
 
-variable "vnet_address_space" { type = list(string) }
-variable "aks_subnet_prefix" { type = list(string) }
+variable "vnet_address_space" {
+  type    = list(string)
+  default = ["10.42.0.0/16"]
+}
+variable "aks_subnet_prefix" {
+  type    = list(string)
+  default = ["10.42.0.0/22"]
+}
 
 variable "private_endpoint_subnet_prefix" {
   type    = list(string)
-  default = []
+  default = ["10.42.10.0/24"]
+}
+
+variable "enable_private_endpoints" {
+  type    = bool
+  default = true
+}
+
+variable "enable_private_endpoint_key_vault" {
+  type    = bool
+  default = true
+}
+
+variable "enable_private_endpoint_postgres" {
+  type    = bool
+  default = true
+}
+
+variable "enable_private_endpoint_storage_blob" {
+  type    = bool
+  default = true
+}
+
+variable "enable_private_endpoint_ai_foundry" {
+  type    = bool
+  default = true
+}
+
+variable "key_vault_public_network_access_enabled" {
+  type    = bool
+  default = false
+}
+
+variable "postgres_public_network_access_enabled" {
+  type    = bool
+  default = false
+}
+
+variable "postgres_create_azure_services_firewall_rule" {
+  type    = bool
+  default = false
+}
+
+variable "storage_public_network_access_enabled" {
+  type    = bool
+  default = false
 }
 
 variable "management_subnet_prefix" {
   type    = list(string)
-  default = []
+  default = ["10.42.30.0/24"]
 }
 
 variable "aks_node_count" {
@@ -63,27 +114,27 @@ variable "aks_node_count" {
 
 variable "aks_auto_scaling_enabled" {
   type    = bool
-  default = false
+  default = true
 }
 
 variable "aks_min_count" {
   type    = number
-  default = null
+  default = 1
 }
 
 variable "aks_max_count" {
   type    = number
-  default = null
+  default = 2
 }
 
 variable "aks_vm_size" {
   type    = string
-  default = "Standard_D4s_v5"
+  default = "Standard_D2s_v3"
 }
 
 variable "aks_user_node_pool_enabled" {
   type    = bool
-  default = false
+  default = true
 }
 
 variable "aks_user_node_count" {
@@ -118,7 +169,7 @@ variable "api_server_authorized_ip_ranges" {
 
 variable "postgres_admin_login" {
   type    = string
-  default = "clustersageadmin"
+  default = "useradmin"
 }
 
 variable "postgres_admin_password" {
@@ -128,7 +179,7 @@ variable "postgres_admin_password" {
 
 variable "postgres_server_name" {
   type    = string
-  default = null
+  default = "pg-clustersage-prod"
 }
 
 variable "postgres_database_name" {
@@ -138,7 +189,7 @@ variable "postgres_database_name" {
 
 variable "postgres_sku_name" {
   type    = string
-  default = "B_Standard_B2s"
+  default = "GP_Standard_D2s_v3"
 }
 
 variable "postgres_storage_mb" {
@@ -148,17 +199,17 @@ variable "postgres_storage_mb" {
 
 variable "postgres_create_replica" {
   type    = bool
-  default = false
+  default = true
 }
 
 variable "postgres_replica_name" {
   type    = string
-  default = null
+  default = "pg-clustersage-prod-dr"
 }
 
 variable "postgres_replica_location" {
   type    = string
-  default = null
+  default = "South India"
 }
 
 variable "create_database" {
@@ -228,12 +279,12 @@ variable "argocd_server_service_type" {
 
 variable "frontdoor_origin_host_name" {
   type    = string
-  default = ""
+  default = "20.204.246.204"
 }
 
 variable "frontdoor_origin_host_header" {
   type    = string
-  default = ""
+  default = "nexaflow.site"
 }
 
 variable "create_frontdoor" {
@@ -243,22 +294,22 @@ variable "create_frontdoor" {
 
 variable "frontdoor_custom_domain_names" {
   type    = list(string)
-  default = []
+  default = ["nexaflow.site", "www.nexaflow.site"]
 }
 
 variable "ai_foundry_enabled" {
   type    = bool
-  default = false
+  default = true
 }
 
 variable "ai_foundry_name" {
   type    = string
-  default = null
+  default = "oaiclustersageprod"
 }
 
 variable "ai_foundry_location" {
   type    = string
-  default = null
+  default = "South India"
 }
 
 variable "ai_model_deployment_name" {
@@ -273,7 +324,7 @@ variable "ai_model_name" {
 
 variable "ai_model_version" {
   type    = string
-  default = ""
+  default = "2025-04-14"
 }
 
 variable "ai_model_sku_name" {
@@ -308,15 +359,17 @@ variable "ai_key_vault_secret_name" {
 
 variable "ai_local_auth_enabled" {
   type    = bool
-  default = true
+  default = false
 }
 
 variable "ai_public_network_access_enabled" {
   type    = bool
-  default = true
+  default = false
 }
 
 variable "tags" {
-  type    = map(string)
-  default = {}
+  type = map(string)
+  default = {
+    Owner = "platform"
+  }
 }

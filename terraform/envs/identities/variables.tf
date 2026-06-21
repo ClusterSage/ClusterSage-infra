@@ -2,6 +2,7 @@ variable "subscription_id" {
   description = "Azure subscription ID containing the ClusterSage global shared resources."
   type        = string
   nullable    = false
+  default     = "de6d42ab-61dd-4743-a7de-166cd3281198"
 
   validation {
     condition     = can(regex("^[0-9a-fA-F-]{36}$", trimspace(var.subscription_id)))
@@ -13,6 +14,7 @@ variable "tenant_id" {
   description = "Microsoft Entra tenant ID where the GitHub Actions app registration will be created."
   type        = string
   nullable    = false
+  default     = "e273e7a6-0676-4113-8575-ca2b6f3dd2ad"
 
   validation {
     condition     = can(regex("^[0-9a-fA-F-]{36}$", trimspace(var.tenant_id)))
@@ -41,6 +43,7 @@ variable "acr_name" {
   description = "Name of the existing global shared Azure Container Registry."
   type        = string
   nullable    = false
+  default     = "acrclustersage"
 
   validation {
     condition     = can(regex("^[a-zA-Z0-9]{5,50}$", var.acr_name))
@@ -52,6 +55,7 @@ variable "acr_resource_group_name" {
   description = "Resource group containing the existing global shared ACR."
   type        = string
   nullable    = false
+  default     = "rg-clustersage-global"
 }
 
 variable "acr_abac_enabled" {
@@ -74,6 +78,7 @@ variable "acr_abac_enabled" {
 
   type     = bool
   nullable = false
+  default  = false
 }
 
 variable "github_federated_credentials" {
@@ -90,6 +95,33 @@ variable "github_federated_credentials" {
     subject     = string
     description = optional(string)
   }))
+
+  default = {
+    frontend_main = {
+      subject     = "repo:ClusterSage/ClusterSage-frontend:ref:refs/heads/main"
+      description = "Allows the ClusterSage frontend main branch to push frontend images."
+    }
+    services_main = {
+      subject     = "repo:ClusterSage/ClusterSage-services:ref:refs/heads/main"
+      description = "Allows the ClusterSage services main branch to push backend service images."
+    }
+    helm_main = {
+      subject     = "repo:ClusterSage/ClusterSage-helm:ref:refs/heads/main"
+      description = "Allows the ClusterSage Helm repository main branch to access Azure when required."
+    }
+    gitops_main = {
+      subject     = "repo:ClusterSage/ClusterSage-gitops:ref:refs/heads/main"
+      description = "Allows the ClusterSage GitOps repository main branch to access Azure when required."
+    }
+    infra_main = {
+      subject     = "repo:ClusterSage/ClusterSage-infra:ref:refs/heads/main"
+      description = "Allows non-deployment validation from the ClusterSage infra main branch."
+    }
+    docs_main = {
+      subject     = "repo:ClusterSage/ClusterSage-docs:ref:refs/heads/main"
+      description = "Allows the ClusterSage docs repository main branch to access Azure when required."
+    }
+  }
 
   validation {
     condition = alltrue([

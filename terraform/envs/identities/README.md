@@ -2,15 +2,20 @@
 
 This Terraform root creates the shared Microsoft Entra application registration and service principal used by GitHub Actions OIDC across the ClusterSage repositories.
 
-## What you must fill in
+## Current configuration model
 
-Update [terraform.tfvars](./terraform.tfvars) with your real values:
+This root no longer relies on a committed `terraform.tfvars`.
 
-- `subscription_id`: the Azure subscription that owns the ClusterSage shared resources, especially ACR.
-- `tenant_id`: your Microsoft Entra tenant ID.
-- `acr_name`: the existing ACR name from `global-shared`.
-- `acr_resource_group_name`: the resource group that contains that ACR.
-- `acr_abac_enabled`: set to `true` only if `az acr show --query roleAssignmentMode` returns an ABAC-enabled mode.
+The non-secret defaults now live in [variables.tf](./variables.tf), including:
+
+- `subscription_id`
+- `tenant_id`
+- `acr_name`
+- `acr_resource_group_name`
+- `acr_abac_enabled`
+- `github_federated_credentials`
+
+Update `variables.tf` if those non-secret defaults need to change.
 
 You can fetch the first two values with:
 
@@ -45,7 +50,6 @@ terraform plan
 
 `terraform plan` will only succeed after:
 
-- you replace the placeholder values in `terraform.tfvars`
 - you are authenticated to the correct Azure tenant/subscription
 - the referenced global shared ACR already exists
 
