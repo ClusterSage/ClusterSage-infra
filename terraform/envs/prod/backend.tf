@@ -4,5 +4,7 @@ terraform {
     storage_account_name = "norahterraformstorageacc"
     container_name       = "terraformstate"
     key                  = "prod.tfstate"
+    use_azuread_auth     = true
+    use_oidc             = true
   }
 }
