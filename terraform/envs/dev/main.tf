@@ -14,6 +14,7 @@ locals {
   })
   origin_host_header     = var.frontdoor_origin_host_header != "" ? var.frontdoor_origin_host_header : var.frontdoor_origin_host_name
   frontdoor_origin_ready = var.frontdoor_origin_host_name != "" && var.frontdoor_origin_host_name != "replace-after-kgateway-load-balancer-is-created"
+  nonprod_openai_account_id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/rg-${lower(var.project_name)}-nonprod-shared/providers/Microsoft.CognitiveServices/accounts/oai-${lower(var.project_name)}-nonprod"
 }
 
 module "resource_group" {
@@ -182,6 +183,12 @@ resource "azurerm_role_assignment" "keyvault_current_user" {
 resource "azurerm_role_assignment" "keyvault_workload_reader" {
   scope                = module.key_vault.id
   role_definition_name = "Key Vault Secrets User"
+  principal_id         = module.managed_identity.principal_id
+}
+
+resource "azurerm_role_assignment" "openai_workload_user" {
+  scope                = local.nonprod_openai_account_id
+  role_definition_name = "Cognitive Services OpenAI User"
   principal_id         = module.managed_identity.principal_id
 }
 
