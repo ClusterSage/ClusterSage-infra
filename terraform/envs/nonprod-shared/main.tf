@@ -129,5 +129,10 @@ module "ai_services" {
   create_openai                = var.create_openai
   openai_location              = var.openai_location
   openai_name                  = "oai-${lower(var.project_name)}-nonprod"
+  openai_deployment_name       = var.openai_deployment_name
+  openai_model_name            = var.openai_model_name
+  openai_model_version         = var.openai_model_version
+  openai_deployment_sku_name   = var.openai_deployment_sku_name
+  openai_deployment_capacity   = var.openai_deployment_capacity
   tags                         = local.tags
 }

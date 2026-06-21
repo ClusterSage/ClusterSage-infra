@@ -5,3 +5,7 @@ output "document_intelligence_endpoint" {
 output "openai_endpoint" {
   value = var.create_openai ? azurerm_cognitive_account.openai[0].endpoint : null
 }
+
+output "openai_deployment_name" {
+  value = length(azurerm_cognitive_deployment.openai) > 0 ? azurerm_cognitive_deployment.openai[0].name : null
+}

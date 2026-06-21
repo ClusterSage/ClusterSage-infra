@@ -87,3 +87,28 @@ variable "openai_location" {
   type    = string
   default = null
 }
+
+variable "openai_deployment_name" {
+  type    = string
+  default = "gpt-4.1-mini"
+}
+
+variable "openai_model_name" {
+  type    = string
+  default = "gpt-4.1-mini"
+}
+
+variable "openai_model_version" {
+  type    = string
+  default = "2025-04-14"
+}
+
+variable "openai_deployment_sku_name" {
+  type    = string
+  default = "Standard"
+}
+
+variable "openai_deployment_capacity" {
+  type    = number
+  default = 1
+}

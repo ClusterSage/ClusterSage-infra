@@ -7,3 +7,4 @@ output "frontdoor_custom_domain_ids" { value = module.frontdoor.custom_domain_id
 output "frontdoor_route_ids" { value = module.frontdoor.route_ids }
 output "document_intelligence_endpoint" { value = module.ai_services.document_intelligence_endpoint }
 output "openai_endpoint" { value = module.ai_services.openai_endpoint }
+output "openai_deployment_name" { value = module.ai_services.openai_deployment_name }

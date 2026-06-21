@@ -17,3 +17,21 @@ resource "azurerm_cognitive_account" "openai" {
   sku_name            = var.openai_sku_name
   tags                = var.tags
 }
+
+resource "azurerm_cognitive_deployment" "openai" {
+  count = var.create_openai && var.openai_deployment_name != "" && var.openai_model_name != "" ? 1 : 0
+
+  name                 = var.openai_deployment_name
+  cognitive_account_id = azurerm_cognitive_account.openai[0].id
+
+  model {
+    format  = "OpenAI"
+    name    = var.openai_model_name
+    version = var.openai_model_version
+  }
+
+  sku {
+    name     = var.openai_deployment_sku_name
+    capacity = var.openai_deployment_capacity
+  }
+}

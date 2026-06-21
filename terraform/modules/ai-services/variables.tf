@@ -36,3 +36,28 @@ variable "openai_sku_name" {
   type    = string
   default = "S0"
 }
+
+variable "openai_deployment_name" {
+  type    = string
+  default = ""
+}
+
+variable "openai_model_name" {
+  type    = string
+  default = ""
+}
+
+variable "openai_model_version" {
+  type    = string
+  default = ""
+}
+
+variable "openai_deployment_sku_name" {
+  type    = string
+  default = "Standard"
+}
+
+variable "openai_deployment_capacity" {
+  type    = number
+  default = 1
+}
