@@ -51,7 +51,7 @@ jobs:
             [ -z "$file" ] && continue
             case "$file" in
               terraform/modules/*|terraform/scripts/*|terraform/README.md|terraform/PROVIDER_MIRROR.md)
-                for env_name in identities global-shared nonprod-shared dev staging prod; do
+                for env_name in identities global-shared nonprod-shared dev prod; do
                   add_env "$env_name"
                 done
                 ;;
@@ -59,7 +59,7 @@ jobs:
                 remainder="${file#terraform/envs/}"
                 env_name="${remainder%%/*}"
                 case "$env_name" in
-                  identities|global-shared|nonprod-shared|dev|staging|prod)
+                  identities|global-shared|nonprod-shared|dev|prod)
                     add_env "$env_name"
                     ;;
                 esac
@@ -105,6 +105,7 @@ jobs:
         environment: ${{ fromJson(needs.detect-envs.outputs.envs) }}
     env:
       ARM_USE_OIDC: "true"
+      ARM_USE_AZUREAD: "true"
       ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID != '' && secrets.AZURE_CLIENT_ID || vars.AZURE_CLIENT_ID }}
       ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID != '' && secrets.AZURE_TENANT_ID || vars.AZURE_TENANT_ID }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID != '' && secrets.AZURE_SUBSCRIPTION_ID || vars.AZURE_SUBSCRIPTION_ID }}

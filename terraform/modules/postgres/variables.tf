@@ -13,6 +13,22 @@ variable "administrator_password" {
 }
 variable "sku_name" { type = string }
 variable "storage_mb" { type = number }
+variable "private_dns_zone_id" {
+  type    = string
+  default = null
+}
+variable "public_network_access_enabled" {
+  type    = bool
+  default = true
+}
+variable "replica_public_network_access_enabled" {
+  type    = bool
+  default = null
+}
+variable "create_azure_services_firewall_rule" {
+  type    = bool
+  default = true
+}
 variable "tags" { type = map(string) }
 
 variable "create_replica" {

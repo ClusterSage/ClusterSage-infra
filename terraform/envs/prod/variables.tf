@@ -194,7 +194,7 @@ variable "postgres_sku_name" {
 
 variable "postgres_storage_mb" {
   type    = number
-  default = 32768
+  default = 65536
 }
 
 variable "postgres_create_replica" {
@@ -234,7 +234,7 @@ variable "email_sender_display_name" {
 
 variable "key_vault_secrets_officer_principal_id" {
   type    = string
-  default = null
+  default = "828c4d22-5077-4f46-8723-0c6cd908bc83"
 }
 
 variable "platform_namespace" {
@@ -254,12 +254,12 @@ variable "kgateway_namespace" {
 
 variable "bootstrap_kgateway" {
   type    = bool
-  default = false
+  default = true
 }
 
 variable "bootstrap_argocd" {
   type    = bool
-  default = false
+  default = true
 }
 
 variable "argocd_namespace" {
@@ -289,7 +289,7 @@ variable "frontdoor_origin_host_header" {
 
 variable "create_frontdoor" {
   type    = bool
-  default = false
+  default = true
 }
 
 variable "frontdoor_custom_domain_names" {

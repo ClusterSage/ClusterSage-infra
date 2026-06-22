@@ -73,6 +73,12 @@ resource "azurerm_kubernetes_cluster_node_pool" "user" {
   node_labels           = var.user_node_labels
   node_taints           = length(var.user_node_taints) > 0 ? var.user_node_taints : null
   tags                  = var.tags
+
+  lifecycle {
+    ignore_changes = [
+      upgrade_settings,
+    ]
+  }
 }
 
 resource "azurerm_role_assignment" "acr_pull" {

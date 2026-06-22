@@ -39,6 +39,12 @@ variable "github_actions_application_name" {
   default     = "ClusterSage-github-actions"
 }
 
+variable "entra_owner_object_id" {
+  description = "Object ID that should remain the owner of the shared Microsoft Entra application and service principal."
+  type        = string
+  default     = "828c4d22-5077-4f46-8723-0c6cd908bc83"
+}
+
 variable "acr_name" {
   description = "Name of the existing global shared Azure Container Registry."
   type        = string

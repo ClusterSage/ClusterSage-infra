@@ -18,12 +18,16 @@ output "managed_identity_client_id" { value = module.managed_identity.client_id 
 output "communication_email_endpoint" { value = module.email.communication_service_endpoint }
 output "communication_email_sender_address" { value = module.email.sender_address }
 output "key_vault_uri" { value = module.key_vault.vault_uri }
+output "key_vault_private_endpoint_id" { value = module.key_vault_private_endpoint.id }
 output "application_insights_connection_string" {
   value     = module.monitoring.application_insights_connection_string
   sensitive = true
 }
 output "postgres_fqdn" { value = var.create_database ? module.postgres[0].fqdn : null }
 output "postgres_replica_fqdn" { value = var.create_database ? module.postgres[0].replica_fqdn : null }
+output "postgres_private_endpoint_id" { value = module.postgres_private_endpoint.id }
+output "private_dns_zone_ids" { value = module.private_dns.ids }
+output "storage_blob_private_endpoint_id" { value = module.storage_blob_private_endpoint.id }
 output "aks_user_node_pool_id" { value = module.aks.user_node_pool_id }
 output "kgateway_namespace" { value = var.kgateway_namespace }
 output "argocd_namespace" { value = var.argocd_namespace }
@@ -36,6 +40,7 @@ output "ai_foundry_endpoint" { value = var.ai_foundry_enabled ? module.ai_foundr
 output "ai_foundry_name" { value = var.ai_foundry_enabled ? module.ai_foundry.name : null }
 output "ai_foundry_deployment_name" { value = var.ai_foundry_enabled ? module.ai_foundry.deployment_name : null }
 output "ai_foundry_api_version" { value = var.ai_foundry_enabled ? var.ai_foundry_api_version : null }
+output "ai_foundry_private_endpoint_id" { value = module.ai_foundry_private_endpoint.id }
 output "ai_key_vault_secret_name" { value = var.ai_foundry_enabled && var.ai_store_api_key_in_key_vault ? module.ai_foundry.api_key_secret_name : null }
 output "ai_foundry_primary_access_key" {
   value     = var.ai_foundry_enabled && var.ai_store_api_key_in_key_vault ? module.ai_foundry.primary_access_key : null

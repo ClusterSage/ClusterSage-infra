@@ -15,7 +15,7 @@ variable "acr_name" {
 
 variable "acr_anonymous_pull_enabled" {
   type    = bool
-  default = false
+  default = true
 }
 
 variable "tags" {

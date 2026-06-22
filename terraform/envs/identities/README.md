@@ -10,6 +10,7 @@ The non-secret defaults now live in [variables.tf](./variables.tf), including:
 
 - `subscription_id`
 - `tenant_id`
+- `entra_owner_object_id`
 - `acr_name`
 - `acr_resource_group_name`
 - `acr_abac_enabled`
@@ -29,6 +30,8 @@ Adjust `github_federated_credentials` if:
 - your GitHub default branch is not `main`
 - you want additional repos trusted
 - your org or repo names differ from the current `ClusterSage/ClusterSage-*` convention
+
+Keep `entra_owner_object_id` pinned to the live user object ID that owns the shared app registration. Using the current authenticated principal in CI would cause Terraform drift by trying to replace that owner with the GitHub Actions service principal.
 
 ## Expected backend
 

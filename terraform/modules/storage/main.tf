@@ -6,6 +6,7 @@ resource "azurerm_storage_account" "main" {
   account_replication_type        = "LRS"
   min_tls_version                 = "TLS1_2"
   allow_nested_items_to_be_public = false
+  public_network_access_enabled   = var.public_network_access_enabled
   shared_access_key_enabled       = true
   tags                            = var.tags
 }
