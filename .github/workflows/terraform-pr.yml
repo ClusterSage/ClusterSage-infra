@@ -93,10 +93,28 @@ jobs:
       - run: terraform fmt -check -recursive
         working-directory: ${{ env.TERRAFORM_ROOT }}
 
+  trivy-iac:
+    needs:
+      - detect-envs
+      - fmt
+    if: needs.detect-envs.outputs.has_envs == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Trivy IaC scan
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: config
+          scan-ref: ${{ env.TERRAFORM_ROOT }}
+          format: table
+          severity: HIGH,CRITICAL
+
   plan:
     needs:
       - detect-envs
       - fmt
+      - trivy-iac
     if: needs.detect-envs.outputs.has_envs == 'true'
     runs-on: ubuntu-latest
     strategy:
