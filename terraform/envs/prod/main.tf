@@ -14,6 +14,28 @@ locals {
   })
   origin_host_header     = var.frontdoor_origin_host_header != "" ? var.frontdoor_origin_host_header : var.frontdoor_origin_host_name
   frontdoor_origin_ready = var.frontdoor_origin_host_name != "" && var.frontdoor_origin_host_name != "replace-after-kgateway-load-balancer-is-created"
+  private_dns_zones = var.enable_private_endpoints ? merge(
+    var.enable_private_endpoint_key_vault ? {
+      "privatelink.vaultcore.azure.net" = {
+        name_prefix = "${local.name_prefix}-privatelink-vaultcore-azure-net"
+      }
+    } : {},
+    var.enable_private_endpoint_postgres ? {
+      "privatelink.postgres.database.azure.com" = {
+        name_prefix = "${local.name_prefix}-privatelink-postgres-database-azure-com"
+      }
+    } : {},
+    var.enable_private_endpoint_storage_blob ? {
+      "privatelink.blob.core.windows.net" = {
+        name_prefix = "${local.name_prefix}-privatelink-blob-core-windows-net"
+      }
+    } : {},
+    var.enable_private_endpoint_ai_foundry ? {
+      "privatelink.openai.azure.com" = {
+        name_prefix = "${local.name_prefix}-privatelink-openai-azure-com"
+      }
+    } : {}
+  ) : {}
 }
 
 module "resource_group" {
@@ -33,6 +55,14 @@ module "networking" {
   private_endpoint_subnet_prefixes = var.private_endpoint_subnet_prefix
   management_subnet_prefixes       = var.management_subnet_prefix
   tags                             = local.tags
+}
+
+module "private_dns" {
+  source              = "../../modules/private-dns"
+  resource_group_name = module.resource_group.name
+  virtual_network_id  = module.networking.vnet_id
+  zones               = local.private_dns_zones
+  tags                = local.tags
 }
 
 module "managed_identity" {
@@ -104,21 +134,23 @@ module "email" {
 }
 
 module "storage" {
-  source              = "../../modules/storage"
-  name_prefix         = local.name_prefix
-  resource_group_name = module.resource_group.name
-  location            = module.resource_group.location
-  container_name      = var.storage_container_name
-  tags                = local.tags
+  source                        = "../../modules/storage"
+  name_prefix                   = local.name_prefix
+  resource_group_name           = module.resource_group.name
+  location                      = module.resource_group.location
+  container_name                = var.storage_container_name
+  public_network_access_enabled = var.storage_public_network_access_enabled
+  tags                          = local.tags
 }
 
 module "key_vault" {
-  source              = "../../modules/keyvault"
-  name_prefix         = local.name_prefix
-  resource_group_name = module.resource_group.name
-  location            = module.resource_group.location
-  tenant_id           = data.azurerm_client_config.current.tenant_id
-  tags                = local.tags
+  source                        = "../../modules/keyvault"
+  name_prefix                   = local.name_prefix
+  resource_group_name           = module.resource_group.name
+  location                      = module.resource_group.location
+  tenant_id                     = data.azurerm_client_config.current.tenant_id
+  public_network_access_enabled = var.key_vault_public_network_access_enabled
+  tags                          = local.tags
 }
 
 module "ai_foundry" {
@@ -144,21 +176,76 @@ module "ai_foundry" {
 }
 
 module "postgres" {
-  count                  = var.create_database ? 1 : 0
-  source                 = "../../modules/postgres"
-  name_prefix            = local.name_prefix
-  server_name            = var.postgres_server_name
-  database_name          = var.postgres_database_name
-  resource_group_name    = module.resource_group.name
-  location               = module.resource_group.location
-  administrator_login    = var.postgres_admin_login
-  administrator_password = var.postgres_admin_password
-  sku_name               = var.postgres_sku_name
-  storage_mb             = var.postgres_storage_mb
-  create_replica         = var.postgres_create_replica
-  replica_name           = var.postgres_replica_name
-  replica_location       = var.postgres_replica_location
-  tags                   = local.tags
+  count                                 = var.create_database ? 1 : 0
+  source                                = "../../modules/postgres"
+  name_prefix                           = local.name_prefix
+  server_name                           = var.postgres_server_name
+  database_name                         = var.postgres_database_name
+  resource_group_name                   = module.resource_group.name
+  location                              = module.resource_group.location
+  administrator_login                   = var.postgres_admin_login
+  administrator_password                = var.postgres_admin_password
+  sku_name                              = var.postgres_sku_name
+  storage_mb                            = var.postgres_storage_mb
+  create_replica                        = var.postgres_create_replica
+  replica_name                          = var.postgres_replica_name
+  replica_location                      = var.postgres_replica_location
+  public_network_access_enabled         = var.postgres_public_network_access_enabled
+  replica_public_network_access_enabled = true
+  create_azure_services_firewall_rule   = var.postgres_create_azure_services_firewall_rule
+  tags                                  = local.tags
+}
+
+module "key_vault_private_endpoint" {
+  source                         = "../../modules/private-endpoint"
+  enabled                        = var.enable_private_endpoints && var.enable_private_endpoint_key_vault
+  name                           = "pep-${local.name_prefix}-kv"
+  location                       = module.resource_group.location
+  resource_group_name            = module.resource_group.name
+  subnet_id                      = module.networking.private_endpoint_subnet_id
+  private_connection_resource_id = module.key_vault.id
+  subresource_names              = ["vault"]
+  private_dns_zone_ids           = [module.private_dns.ids["privatelink.vaultcore.azure.net"]]
+  tags                           = local.tags
+}
+
+module "postgres_private_endpoint" {
+  source                         = "../../modules/private-endpoint"
+  enabled                        = var.enable_private_endpoints && var.enable_private_endpoint_postgres && var.create_database
+  name                           = "pep-${local.name_prefix}-postgres"
+  location                       = module.resource_group.location
+  resource_group_name            = module.resource_group.name
+  subnet_id                      = module.networking.private_endpoint_subnet_id
+  private_connection_resource_id = module.postgres[0].id
+  subresource_names              = ["postgresqlServer"]
+  private_dns_zone_ids           = [module.private_dns.ids["privatelink.postgres.database.azure.com"]]
+  tags                           = local.tags
+}
+
+module "storage_blob_private_endpoint" {
+  source                         = "../../modules/private-endpoint"
+  enabled                        = var.enable_private_endpoints && var.enable_private_endpoint_storage_blob
+  name                           = "pep-${local.name_prefix}-blob"
+  location                       = module.resource_group.location
+  resource_group_name            = module.resource_group.name
+  subnet_id                      = module.networking.private_endpoint_subnet_id
+  private_connection_resource_id = module.storage.account_id
+  subresource_names              = ["blob"]
+  private_dns_zone_ids           = [module.private_dns.ids["privatelink.blob.core.windows.net"]]
+  tags                           = local.tags
+}
+
+module "ai_foundry_private_endpoint" {
+  source                         = "../../modules/private-endpoint"
+  enabled                        = var.enable_private_endpoints && var.enable_private_endpoint_ai_foundry && var.ai_foundry_enabled
+  name                           = "pep-${local.name_prefix}-openai"
+  location                       = module.resource_group.location
+  resource_group_name            = module.resource_group.name
+  subnet_id                      = module.networking.private_endpoint_subnet_id
+  private_connection_resource_id = module.ai_foundry.id
+  subresource_names              = ["account"]
+  private_dns_zone_ids           = [module.private_dns.ids["privatelink.openai.azure.com"]]
+  tags                           = local.tags
 }
 
 module "workload_identity" {

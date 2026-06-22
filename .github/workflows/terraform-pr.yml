@@ -51,7 +51,7 @@ jobs:
             [ -z "$file" ] && continue
             case "$file" in
               terraform/modules/*|terraform/scripts/*|terraform/README.md|terraform/PROVIDER_MIRROR.md)
-                for env_name in identities global-shared nonprod-shared dev staging prod; do
+                for env_name in identities global-shared nonprod-shared dev prod; do
                   add_env "$env_name"
                 done
                 ;;
@@ -59,7 +59,7 @@ jobs:
                 remainder="${file#terraform/envs/}"
                 env_name="${remainder%%/*}"
                 case "$env_name" in
-                  identities|global-shared|nonprod-shared|dev|staging|prod)
+                  identities|global-shared|nonprod-shared|dev|prod)
                     add_env "$env_name"
                     ;;
                 esac

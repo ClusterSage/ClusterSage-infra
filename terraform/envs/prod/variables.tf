@@ -194,7 +194,7 @@ variable "postgres_sku_name" {
 
 variable "postgres_storage_mb" {
   type    = number
-  default = 32768
+  default = 65536
 }
 
 variable "postgres_create_replica" {
@@ -254,12 +254,12 @@ variable "kgateway_namespace" {
 
 variable "bootstrap_kgateway" {
   type    = bool
-  default = false
+  default = true
 }
 
 variable "bootstrap_argocd" {
   type    = bool
-  default = false
+  default = true
 }
 
 variable "argocd_namespace" {
@@ -289,7 +289,7 @@ variable "frontdoor_origin_host_header" {
 
 variable "create_frontdoor" {
   type    = bool
-  default = false
+  default = true
 }
 
 variable "frontdoor_custom_domain_names" {

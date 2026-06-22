@@ -254,12 +254,12 @@ variable "kgateway_namespace" {
 
 variable "bootstrap_kgateway" {
   type    = bool
-  default = false
+  default = true
 }
 
 variable "bootstrap_argocd" {
   type    = bool
-  default = false
+  default = true
 }
 
 variable "argocd_namespace" {
@@ -279,7 +279,7 @@ variable "argocd_server_service_type" {
 
 variable "frontdoor_origin_host_name" {
   type    = string
-  default = ""
+  default = "4.224.190.164"
 }
 
 variable "frontdoor_origin_host_header" {

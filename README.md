@@ -13,6 +13,8 @@ This folder is prepared to become the standalone `ClusterSage-infra` repository.
 
 Terraform provisions Azure infrastructure and platform bootstrap components only. Application workloads are deployed by ArgoCD from `repos/ClusterSage-gitops`.
 
+Current live Azure deployments are managed from `global-shared`, `nonprod-shared`, `dev`, `prod`, and `identities`. The `staging` root remains defined in Terraform but is not currently deployed in Azure.
+
 The old production Docker Compose deployment path was retired in favor of AKS, Helm, and GitOps.
 
 Current env roots can now express, per environment:
@@ -36,3 +38,7 @@ These scripts use a two-phase flow:
 2. Create or destroy the Azure infrastructure layer.
 
 This avoids Terraform provider lifecycle issues that can occur when the same root both creates an AKS cluster and immediately uses Kubernetes and Helm providers against that cluster in the same one-shot operation.
+
+## GitHub Actions scope
+
+Terraform PR validation and Terraform apply are intentionally disabled for `terraform/envs/staging` until a staging environment is deployed again. Workflow auto-detection now targets `identities`, `global-shared`, `nonprod-shared`, `dev`, and `prod`.
