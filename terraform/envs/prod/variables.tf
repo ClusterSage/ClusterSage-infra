@@ -234,7 +234,7 @@ variable "email_sender_display_name" {
 
 variable "key_vault_secrets_officer_principal_id" {
   type    = string
-  default = null
+  default = "828c4d22-5077-4f46-8723-0c6cd908bc83"
 }
 
 variable "platform_namespace" {
