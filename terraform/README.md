@@ -14,6 +14,8 @@ Each root uses a separate Azure Blob Storage backend key. Terraform workspaces a
 
 The currently deployed Azure roots are `global-shared`, `nonprod-shared`, `dev`, `prod`, and `identities`. `envs/staging` is presently an empty state and should not be targeted by CI apply or PR validation.
 
+GitHub Actions uses Azure AD authentication for the remote state backend with OIDC (`ARM_USE_OIDC=true`, `ARM_USE_AZUREAD=true`) against `norahterraformstorageacc`, so the workflow identity only needs blob data access to the state account and does not need storage account key lookup.
+
 ## Apply Order
 
 1. `global-shared`
