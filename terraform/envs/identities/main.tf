@@ -1,5 +1,3 @@
-data "azuread_client_config" "current" {}
-
 data "azurerm_container_registry" "global_shared" {
   name                = var.acr_name
   resource_group_name = var.acr_resource_group_name
@@ -22,7 +20,7 @@ resource "azuread_application" "github_actions" {
   prevent_duplicate_names = true
 
   owners = [
-    data.azuread_client_config.current.object_id
+    var.entra_owner_object_id
   ]
 }
 
@@ -33,7 +31,7 @@ resource "azuread_service_principal" "github_actions" {
   app_role_assignment_required = false
 
   owners = [
-    data.azuread_client_config.current.object_id
+    var.entra_owner_object_id
   ]
 }
 
