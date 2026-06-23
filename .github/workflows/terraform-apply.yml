@@ -266,4 +266,56 @@ jobs:
           }
 
       - run: terraform init
-      - run: terraform apply -auto-approve tfplan-${{ matrix.environment }}
+
+      - name: Reconcile prod observability resources into state
+        if: matrix.environment == 'prod'
+        run: |
+          set -euo pipefail
+
+          import_if_exists() {
+            local address="$1"
+            local resource_type="$2"
+            local resource_name="$3"
+
+            if terraform state list | grep -Fqx "$address"; then
+              echo "$address already tracked in state."
+              return 0
+            fi
+
+            local resource_id
+            resource_id="$(az resource show \
+              --resource-group "rg-clustersage-prod" \
+              --resource-type "$resource_type" \
+              --name "$resource_name" \
+              --query id \
+              -o tsv 2>/dev/null || true)"
+
+            if [ -z "$resource_id" ]; then
+              echo "$resource_name does not exist remotely yet."
+              return 0
+            fi
+
+            echo "Importing existing resource $resource_name into state."
+            terraform import "$address" "$resource_id"
+          }
+
+          import_if_exists "azurerm_monitor_workspace.managed_prometheus[0]" "Microsoft.Monitor/accounts" "amw-clustersage-prod"
+          import_if_exists "azurerm_dashboard_grafana.managed[0]" "Microsoft.Dashboard/grafana" "grafana-prod"
+
+      - name: Apply plan with one retry for transient ARM failures
+        run: |
+          set -euo pipefail
+
+          attempt=1
+          max_attempts=2
+
+          until terraform apply -auto-approve "tfplan-${{ matrix.environment }}"; do
+            if [ "$attempt" -ge "$max_attempts" ]; then
+              echo "terraform apply failed after ${attempt} attempts."
+              exit 1
+            fi
+
+            echo "terraform apply failed, waiting before retry ${attempt}/${max_attempts}."
+            sleep 30
+            attempt=$((attempt + 1))
+          done
