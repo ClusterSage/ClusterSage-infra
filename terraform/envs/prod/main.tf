@@ -88,7 +88,10 @@ resource "azurerm_monitor_workspace" "managed_prometheus" {
   resource_group_name           = module.resource_group.name
   location                      = module.resource_group.location
   public_network_access_enabled = var.azure_monitor_workspace_public_network_access_enabled
-  tags                          = local.tags
+  tags = merge(local.tags, {
+    Environment = "Prod"
+    Service     = "Platform"
+  })
 }
 
 resource "azurerm_dashboard_grafana" "managed" {
@@ -100,7 +103,10 @@ resource "azurerm_dashboard_grafana" "managed" {
   grafana_major_version         = var.managed_grafana_major_version
   sku                           = var.managed_grafana_sku
   public_network_access_enabled = var.managed_grafana_public_network_access_enabled
-  tags                          = local.tags
+  tags = merge(local.tags, {
+    Environment = "Prod"
+    Service     = "Platform"
+  })
 
   identity {
     type = "SystemAssigned"
