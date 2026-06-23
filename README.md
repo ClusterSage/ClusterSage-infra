@@ -22,6 +22,7 @@ Current env roots can now express, per environment:
 - autoscaled AKS system-pool sizing
 - an optional separate AKS user node pool
 - an optional cross-region PostgreSQL flexible-server read replica for disaster recovery
+- a private AKS control plane with API server VNet integration when the live cluster has already been cut over safely
 
 These remain normal Terraform-managed infrastructure changes and still require reviewed plans and explicit approval before apply, especially for production.
 
@@ -38,6 +39,16 @@ These scripts use a two-phase flow:
 2. Create or destroy the Azure infrastructure layer.
 
 This avoids Terraform provider lifecycle issues that can occur when the same root both creates an AKS cluster and immediately uses Kubernetes and Helm providers against that cluster in the same one-shot operation.
+
+## Production AKS access posture
+
+`terraform/envs/prod` now matches the live production cluster with:
+
+- a private AKS API server
+- API server VNet integration on a dedicated `snet-apiserver` subnet
+- a user-assigned control-plane identity with subnet-scoped network role assignments
+
+ArgoCD and application delivery continue to work because reconciliation happens from inside the cluster. The prod root keeps the bootstrap toggles disabled by default for steady-state operations, and the AKS resource intentionally ignores the cutover-only control-plane attributes that were finalized through Azure API operations to avoid replacement-driven drift.
 
 ## GitHub Actions scope
 

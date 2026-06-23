@@ -14,6 +14,10 @@ variable "node_count" {
 variable "vm_size" { type = string }
 variable "tags" { type = map(string) }
 variable "tenant_id" { type = string }
+variable "control_plane_identity_ids" {
+  type    = list(string)
+  default = []
+}
 
 variable "auto_scaling_enabled" {
   type    = bool
@@ -133,9 +137,29 @@ variable "private_cluster_enabled" {
   default = false
 }
 
+variable "private_dns_zone_id" {
+  type    = string
+  default = null
+}
+
+variable "private_cluster_public_fqdn_enabled" {
+  type    = bool
+  default = false
+}
+
 variable "local_account_disabled" {
   type    = bool
   default = false
+}
+
+variable "api_server_vnet_integration_enabled" {
+  type    = bool
+  default = false
+}
+
+variable "api_server_subnet_id" {
+  type    = string
+  default = null
 }
 
 variable "api_server_authorized_ip_ranges" {
