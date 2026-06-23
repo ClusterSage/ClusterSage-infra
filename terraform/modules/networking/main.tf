@@ -13,6 +13,22 @@ resource "azurerm_subnet" "aks" {
   address_prefixes     = var.aks_subnet_prefixes
 }
 
+resource "azurerm_subnet" "api_server" {
+  count                = length(var.api_server_subnet_prefixes) > 0 ? 1 : 0
+  name                 = "snet-aks-apiserver"
+  resource_group_name  = var.resource_group_name
+  virtual_network_name = azurerm_virtual_network.main.name
+  address_prefixes     = var.api_server_subnet_prefixes
+
+  delegation {
+    name = "aks-apiserver-delegation"
+
+    service_delegation {
+      name = "Microsoft.ContainerService/managedClusters"
+    }
+  }
+}
+
 resource "azurerm_subnet" "private_endpoints" {
   count                = length(var.private_endpoint_subnet_prefixes) > 0 ? 1 : 0
   name                 = "snet-private-endpoints"

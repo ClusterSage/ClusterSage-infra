@@ -133,6 +133,21 @@ variable "private_cluster_enabled" {
   default = false
 }
 
+variable "private_cluster_public_fqdn_enabled" {
+  type    = bool
+  default = false
+}
+
+variable "api_server_vnet_integration_enabled" {
+  type    = bool
+  default = false
+}
+
+variable "api_server_subnet_id" {
+  type    = string
+  default = null
+}
+
 variable "local_account_disabled" {
   type    = bool
   default = false

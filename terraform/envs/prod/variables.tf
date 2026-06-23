@@ -107,6 +107,11 @@ variable "management_subnet_prefix" {
   default = ["10.42.30.0/24"]
 }
 
+variable "api_server_subnet_prefix" {
+  type    = list(string)
+  default = ["10.42.20.0/28"]
+}
+
 variable "aks_node_count" {
   type    = number
   default = 2
@@ -160,6 +165,21 @@ variable "aks_user_vm_size" {
 variable "aks_local_account_disabled" {
   type    = bool
   default = false
+}
+
+variable "aks_private_cluster_enabled" {
+  type    = bool
+  default = true
+}
+
+variable "aks_private_cluster_public_fqdn_enabled" {
+  type    = bool
+  default = false
+}
+
+variable "aks_api_server_vnet_integration_enabled" {
+  type    = bool
+  default = true
 }
 
 variable "api_server_authorized_ip_ranges" {

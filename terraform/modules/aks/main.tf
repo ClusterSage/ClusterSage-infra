@@ -1,21 +1,24 @@
 resource "azurerm_kubernetes_cluster" "main" {
-  name                              = var.name
-  resource_group_name               = var.resource_group_name
-  location                          = var.location
-  dns_prefix                        = var.name
-  oidc_issuer_enabled               = true
-  workload_identity_enabled         = true
-  role_based_access_control_enabled = true
-  local_account_disabled            = var.local_account_disabled
-  private_cluster_enabled           = var.private_cluster_enabled
-  sku_tier                          = var.sku_tier
-  tags                              = var.tags
+  name                                = var.name
+  resource_group_name                 = var.resource_group_name
+  location                            = var.location
+  dns_prefix                          = var.name
+  oidc_issuer_enabled                 = true
+  workload_identity_enabled           = true
+  role_based_access_control_enabled   = true
+  local_account_disabled              = var.local_account_disabled
+  private_cluster_enabled             = var.private_cluster_enabled
+  private_cluster_public_fqdn_enabled = var.private_cluster_public_fqdn_enabled
+  sku_tier                            = var.sku_tier
+  tags                                = var.tags
 
   dynamic "api_server_access_profile" {
-    for_each = length(var.api_server_authorized_ip_ranges) > 0 ? [1] : []
+    for_each = length(var.api_server_authorized_ip_ranges) > 0 || var.api_server_vnet_integration_enabled ? [1] : []
 
     content {
-      authorized_ip_ranges = var.api_server_authorized_ip_ranges
+      authorized_ip_ranges                = var.api_server_authorized_ip_ranges
+      subnet_id                           = var.api_server_vnet_integration_enabled ? var.api_server_subnet_id : null
+      virtual_network_integration_enabled = var.api_server_vnet_integration_enabled
     }
   }
 

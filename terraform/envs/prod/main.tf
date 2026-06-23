@@ -52,6 +52,7 @@ module "networking" {
   location                         = module.resource_group.location
   address_space                    = var.vnet_address_space
   aks_subnet_prefixes              = var.aks_subnet_prefix
+  api_server_subnet_prefixes       = var.api_server_subnet_prefix
   private_endpoint_subnet_prefixes = var.private_endpoint_subnet_prefix
   management_subnet_prefixes       = var.management_subnet_prefix
   tags                             = local.tags
@@ -149,6 +150,41 @@ module "aks" {
   acr_id                          = data.azurerm_container_registry.global_shared.id
   api_server_authorized_ip_ranges = var.api_server_authorized_ip_ranges
   tags                            = local.tags
+}
+
+resource "terraform_data" "aks_private_cluster_update" {
+  count = var.aks_private_cluster_enabled && var.aks_api_server_vnet_integration_enabled ? 1 : 0
+
+  triggers_replace = {
+    aks_name                    = module.aks.aks_name
+    resource_group_name         = module.resource_group.name
+    api_server_subnet_id        = module.networking.api_server_subnet_id
+    private_cluster_enabled     = tostring(var.aks_private_cluster_enabled)
+    private_cluster_public_fqdn = tostring(var.aks_private_cluster_public_fqdn_enabled)
+    api_server_vnet_integration = tostring(var.aks_api_server_vnet_integration_enabled)
+  }
+
+  provisioner "local-exec" {
+    interpreter = ["pwsh", "-Command"]
+    command     = <<-EOT
+$state = az aks show --resource-group '${module.resource_group.name}' --name '${module.aks.aks_name}' --query '{privateCluster:apiServerAccessProfile.enablePrivateCluster,vnetIntegration:apiServerAccessProfile.enableVnetIntegration}' -o json | ConvertFrom-Json
+if ($state.privateCluster -eq $true -and $state.vnetIntegration -eq $true) {
+  Write-Output 'AKS private cluster and API Server VNet Integration are already enabled.'
+  exit 0
+}
+
+az aks update `
+  --resource-group '${module.resource_group.name}' `
+  --name '${module.aks.aks_name}' `
+  --enable-apiserver-vnet-integration `
+  --apiserver-subnet-id '${module.networking.api_server_subnet_id}' `
+  --enable-private-cluster `
+  --only-show-errors `
+  --yes
+EOT
+  }
+
+  depends_on = [module.aks]
 }
 
 resource "terraform_data" "aks_managed_observability" {

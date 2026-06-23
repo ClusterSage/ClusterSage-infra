@@ -3,6 +3,7 @@ output "aks_name" { value = module.aks.aks_name }
 output "acr_login_server" { value = data.azurerm_container_registry.global_shared.login_server }
 output "vnet_id" { value = module.networking.vnet_id }
 output "aks_subnet_id" { value = module.networking.aks_subnet_id }
+output "api_server_subnet_id" { value = module.networking.api_server_subnet_id }
 output "frontdoor_origin_host_name" { value = var.frontdoor_origin_host_name }
 output "frontdoor_origin_host_header" { value = local.origin_host_header }
 output "frontdoor_endpoint_hostname" { value = var.create_frontdoor && length(module.frontdoor) > 0 ? module.frontdoor[0].endpoint_hostname : null }
