@@ -295,8 +295,12 @@ jobs:
               return 0
             fi
 
+            resource_id="$(printf '%s' "$resource_id" | sed 's#/resourcegroups/#/resourceGroups/#I')"
+
             echo "Importing existing resource $resource_name into state."
-            terraform import "$address" "$resource_id"
+            if ! terraform import "$address" "$resource_id"; then
+              echo "Best-effort import for $resource_name failed; continuing with saved plan."
+            fi
           }
 
           import_if_exists "azurerm_monitor_workspace.managed_prometheus[0]" "Microsoft.Monitor/accounts" "amw-clustersage-prod"
