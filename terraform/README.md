@@ -32,3 +32,5 @@ For production-first provisioning, apply `global-shared` and then `prod`.
 `dev` and `prod` rely on private endpoints, private DNS zones, and in-cluster bootstrap resources managed in the same roots. Keep those module connections enabled in code so Terraform continues to match the live Azure deployment instead of planning removals.
 
 `dev`, `staging`, and `prod` pin `key_vault_secrets_officer_principal_id` to the live user object ID that currently owns Key Vault secret management. Avoid falling back to `data.azurerm_client_config.current.object_id` in CI, or GitHub Actions will try to replace that assignment with the workflow service principal.
+
+`prod` now also matches a private AKS control plane. The Terraform configuration keeps the dedicated API server subnet, control-plane user-assigned identity, and required subnet role assignments in state, while the AKS resource ignores the cutover-only private-cluster and API-server-access attributes that were finalized against the live Azure resource to avoid replacement-risk drift.

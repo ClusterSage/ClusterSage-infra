@@ -52,6 +52,11 @@ variable "aks_subnet_prefix" {
   default = ["10.42.0.0/22"]
 }
 
+variable "api_server_subnet_prefix" {
+  type    = list(string)
+  default = ["10.42.20.0/27"]
+}
+
 variable "private_endpoint_subnet_prefix" {
   type    = list(string)
   default = ["10.42.10.0/24"]
@@ -162,6 +167,21 @@ variable "aks_local_account_disabled" {
   default = false
 }
 
+variable "aks_api_server_vnet_integration_enabled" {
+  type    = bool
+  default = true
+}
+
+variable "aks_private_cluster_enabled" {
+  type    = bool
+  default = true
+}
+
+variable "aks_private_dns_zone_id" {
+  type    = string
+  default = "System"
+}
+
 variable "api_server_authorized_ip_ranges" {
   type    = list(string)
   default = []
@@ -254,12 +274,12 @@ variable "kgateway_namespace" {
 
 variable "bootstrap_kgateway" {
   type    = bool
-  default = true
+  default = false
 }
 
 variable "bootstrap_argocd" {
   type    = bool
-  default = true
+  default = false
 }
 
 variable "argocd_namespace" {
@@ -285,6 +305,31 @@ variable "frontdoor_origin_host_name" {
 variable "frontdoor_origin_host_header" {
   type    = string
   default = "nexaflow.site"
+}
+
+variable "jumpbox_enabled" {
+  type    = bool
+  default = false
+}
+
+variable "jumpbox_vm_size" {
+  type    = string
+  default = "Standard_B1ms"
+}
+
+variable "jumpbox_admin_username" {
+  type    = string
+  default = "clustersageadmin"
+}
+
+variable "jumpbox_ssh_public_key" {
+  type    = string
+  default = ""
+}
+
+variable "jumpbox_allowed_ssh_cidrs" {
+  type    = list(string)
+  default = []
 }
 
 variable "create_frontdoor" {

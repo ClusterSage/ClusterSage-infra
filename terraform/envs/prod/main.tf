@@ -52,6 +52,7 @@ module "networking" {
   location                         = module.resource_group.location
   address_space                    = var.vnet_address_space
   aks_subnet_prefixes              = var.aks_subnet_prefix
+  apiserver_subnet_prefixes        = var.api_server_subnet_prefix
   private_endpoint_subnet_prefixes = var.private_endpoint_subnet_prefix
   management_subnet_prefixes       = var.management_subnet_prefix
   tags                             = local.tags
@@ -68,6 +69,14 @@ module "private_dns" {
 module "managed_identity" {
   source              = "../../modules/managed-identity"
   name                = "id-${local.name_prefix}-workloads"
+  resource_group_name = module.resource_group.name
+  location            = module.resource_group.location
+  tags                = local.tags
+}
+
+module "aks_control_plane_identity" {
+  source              = "../../modules/managed-identity"
+  name                = "id-${local.name_prefix}-aks-control-plane"
   resource_group_name = module.resource_group.name
   location            = module.resource_group.location
   tags                = local.tags
@@ -126,29 +135,46 @@ resource "azurerm_role_assignment" "managed_grafana_monitoring_data_reader" {
 }
 
 module "aks" {
-  source                          = "../../modules/aks"
-  name                            = "aks-${local.name_prefix}"
-  resource_group_name             = module.resource_group.name
-  location                        = module.resource_group.location
-  tenant_id                       = data.azurerm_client_config.current.tenant_id
-  local_account_disabled          = var.aks_local_account_disabled
-  aks_subnet_id                   = module.networking.aks_subnet_id
-  log_analytics_workspace_id      = module.monitoring.log_analytics_workspace_id
-  node_count                      = var.aks_node_count
-  auto_scaling_enabled            = var.aks_auto_scaling_enabled
-  min_count                       = var.aks_min_count
-  max_count                       = var.aks_max_count
-  vm_size                         = var.aks_vm_size
-  user_node_pool_enabled          = var.aks_user_node_pool_enabled
-  user_node_count                 = var.aks_user_node_count
-  user_auto_scaling_enabled       = var.aks_user_node_pool_enabled
-  user_min_count                  = var.aks_user_min_count
-  user_max_count                  = var.aks_user_max_count
-  user_vm_size                    = var.aks_user_vm_size
-  user_node_labels                = { "workload" = "user" }
-  acr_id                          = data.azurerm_container_registry.global_shared.id
-  api_server_authorized_ip_ranges = var.api_server_authorized_ip_ranges
-  tags                            = local.tags
+  source                              = "../../modules/aks"
+  name                                = "aks-${local.name_prefix}"
+  resource_group_name                 = module.resource_group.name
+  location                            = module.resource_group.location
+  tenant_id                           = data.azurerm_client_config.current.tenant_id
+  control_plane_identity_ids          = [module.aks_control_plane_identity.id]
+  local_account_disabled              = var.aks_local_account_disabled
+  private_cluster_enabled             = var.aks_private_cluster_enabled
+  private_dns_zone_id                 = var.aks_private_dns_zone_id
+  aks_subnet_id                       = module.networking.aks_subnet_id
+  api_server_vnet_integration_enabled = var.aks_api_server_vnet_integration_enabled
+  api_server_subnet_id                = module.networking.apiserver_subnet_id
+  log_analytics_workspace_id          = module.monitoring.log_analytics_workspace_id
+  node_count                          = var.aks_node_count
+  auto_scaling_enabled                = var.aks_auto_scaling_enabled
+  min_count                           = var.aks_min_count
+  max_count                           = var.aks_max_count
+  vm_size                             = var.aks_vm_size
+  user_node_pool_enabled              = var.aks_user_node_pool_enabled
+  user_node_count                     = var.aks_user_node_count
+  user_auto_scaling_enabled           = var.aks_user_node_pool_enabled
+  user_min_count                      = var.aks_user_min_count
+  user_max_count                      = var.aks_user_max_count
+  user_vm_size                        = var.aks_user_vm_size
+  user_node_labels                    = { "workload" = "user" }
+  acr_id                              = data.azurerm_container_registry.global_shared.id
+  api_server_authorized_ip_ranges     = var.api_server_authorized_ip_ranges
+  tags                                = local.tags
+}
+
+resource "azurerm_role_assignment" "aks_apiserver_subnet_network_contributor" {
+  scope                = module.networking.apiserver_subnet_id
+  role_definition_name = "Network Contributor"
+  principal_id         = module.aks_control_plane_identity.principal_id
+}
+
+resource "azurerm_role_assignment" "aks_node_subnet_network_contributor" {
+  scope                = module.networking.aks_subnet_id
+  role_definition_name = "Network Contributor"
+  principal_id         = module.aks_control_plane_identity.principal_id
 }
 
 resource "terraform_data" "aks_managed_observability" {
@@ -177,7 +203,10 @@ data "azurerm_kubernetes_cluster" "bootstrap" {
   name                = module.aks.aks_name
   resource_group_name = module.resource_group.name
 
-  depends_on = [module.aks]
+  depends_on = [
+    module.aks,
+    azurerm_role_assignment.aks_apiserver_subnet_network_contributor,
+  ]
 }
 
 module "service_bus" {
@@ -369,6 +398,20 @@ module "argocd_bootstrap" {
   enabled             = var.bootstrap_argocd
   namespace           = var.argocd_namespace
   server_service_type = var.argocd_server_service_type
+}
+
+module "jumpbox" {
+  source              = "../../modules/jumpbox"
+  enabled             = var.jumpbox_enabled
+  name_prefix         = local.name_prefix
+  resource_group_name = module.resource_group.name
+  location            = module.resource_group.location
+  subnet_id           = module.networking.management_subnet_id
+  admin_username      = var.jumpbox_admin_username
+  ssh_public_key      = var.jumpbox_ssh_public_key
+  vm_size             = var.jumpbox_vm_size
+  allowed_ssh_cidrs   = var.jumpbox_allowed_ssh_cidrs
+  tags                = local.tags
 }
 
 module "frontdoor" {
