@@ -81,6 +81,44 @@ module "monitoring" {
   tags                = local.tags
 }
 
+resource "azurerm_monitor_workspace" "managed_prometheus" {
+  count = var.aks_managed_observability_enabled ? 1 : 0
+
+  name                          = coalesce(var.azure_monitor_workspace_name, "amw-${local.name_prefix}")
+  resource_group_name           = module.resource_group.name
+  location                      = module.resource_group.location
+  public_network_access_enabled = var.azure_monitor_workspace_public_network_access_enabled
+  tags                          = local.tags
+}
+
+resource "azurerm_dashboard_grafana" "managed" {
+  count = var.aks_managed_observability_enabled ? 1 : 0
+
+  name                          = coalesce(var.managed_grafana_name, "grafana-${var.environment}")
+  resource_group_name           = module.resource_group.name
+  location                      = module.resource_group.location
+  grafana_major_version         = var.managed_grafana_major_version
+  sku                           = var.managed_grafana_sku
+  public_network_access_enabled = var.managed_grafana_public_network_access_enabled
+  tags                          = local.tags
+
+  identity {
+    type = "SystemAssigned"
+  }
+
+  azure_monitor_workspace_integrations {
+    resource_id = azurerm_monitor_workspace.managed_prometheus[0].id
+  }
+}
+
+resource "azurerm_role_assignment" "managed_grafana_monitoring_data_reader" {
+  count = var.aks_managed_observability_enabled ? 1 : 0
+
+  scope                = azurerm_monitor_workspace.managed_prometheus[0].id
+  role_definition_name = "Monitoring Data Reader"
+  principal_id         = azurerm_dashboard_grafana.managed[0].identity[0].principal_id
+}
+
 module "aks" {
   source                          = "../../modules/aks"
   name                            = "aks-${local.name_prefix}"
@@ -105,6 +143,27 @@ module "aks" {
   acr_id                          = data.azurerm_container_registry.global_shared.id
   api_server_authorized_ip_ranges = var.api_server_authorized_ip_ranges
   tags                            = local.tags
+}
+
+resource "terraform_data" "aks_managed_observability" {
+  count = var.aks_managed_observability_enabled ? 1 : 0
+
+  triggers_replace = {
+    aks_name                   = module.aks.aks_name
+    resource_group_name        = module.resource_group.name
+    azure_monitor_workspace_id = azurerm_monitor_workspace.managed_prometheus[0].id
+    grafana_id                 = azurerm_dashboard_grafana.managed[0].id
+  }
+
+  provisioner "local-exec" {
+    interpreter = ["pwsh", "-Command"]
+    command     = "az aks update --resource-group '${module.resource_group.name}' --name '${module.aks.aks_name}' --enable-azure-monitor-metrics --azure-monitor-workspace-resource-id '${azurerm_monitor_workspace.managed_prometheus[0].id}' --grafana-resource-id '${azurerm_dashboard_grafana.managed[0].id}' --only-show-errors --yes"
+  }
+
+  depends_on = [
+    azurerm_dashboard_grafana.managed,
+    azurerm_role_assignment.managed_grafana_monitoring_data_reader,
+  ]
 }
 
 data "azurerm_kubernetes_cluster" "bootstrap" {

@@ -23,6 +23,18 @@ output "application_insights_connection_string" {
   value     = module.monitoring.application_insights_connection_string
   sensitive = true
 }
+output "azure_monitor_workspace_id" {
+  value = var.aks_managed_observability_enabled ? azurerm_monitor_workspace.managed_prometheus[0].id : null
+}
+output "azure_monitor_workspace_query_endpoint" {
+  value = var.aks_managed_observability_enabled ? azurerm_monitor_workspace.managed_prometheus[0].query_endpoint : null
+}
+output "managed_grafana_id" {
+  value = var.aks_managed_observability_enabled ? azurerm_dashboard_grafana.managed[0].id : null
+}
+output "managed_grafana_endpoint" {
+  value = var.aks_managed_observability_enabled ? azurerm_dashboard_grafana.managed[0].endpoint : null
+}
 output "postgres_fqdn" { value = var.create_database ? module.postgres[0].fqdn : null }
 output "postgres_replica_fqdn" { value = var.create_database ? module.postgres[0].replica_fqdn : null }
 output "postgres_private_endpoint_id" { value = module.postgres_private_endpoint.id }
