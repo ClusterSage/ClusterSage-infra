@@ -302,6 +302,41 @@ variable "ai_foundry_enabled" {
   default = true
 }
 
+variable "aks_managed_observability_enabled" {
+  type    = bool
+  default = true
+}
+
+variable "azure_monitor_workspace_name" {
+  type    = string
+  default = null
+}
+
+variable "azure_monitor_workspace_public_network_access_enabled" {
+  type    = bool
+  default = true
+}
+
+variable "managed_grafana_name" {
+  type    = string
+  default = null
+}
+
+variable "managed_grafana_major_version" {
+  type    = string
+  default = "11"
+}
+
+variable "managed_grafana_sku" {
+  type    = string
+  default = "Standard"
+}
+
+variable "managed_grafana_public_network_access_enabled" {
+  type    = bool
+  default = true
+}
+
 variable "ai_foundry_name" {
   type    = string
   default = "oaiclustersageprod"
