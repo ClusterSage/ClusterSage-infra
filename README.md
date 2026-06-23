@@ -47,6 +47,7 @@ This avoids Terraform provider lifecycle issues that can occur when the same roo
 - a private AKS API server
 - API server VNet integration on a dedicated `snet-apiserver` subnet
 - a user-assigned control-plane identity with subnet-scoped network role assignments
+- an Australia Central access bridge in `jump-rg` with a peered VNet, Bastion developer host, and jump VM for private-cluster access when Central India quota is constrained
 
 ArgoCD and application delivery continue to work because reconciliation happens from inside the cluster. The prod root keeps the bootstrap toggles disabled by default for steady-state operations, and the AKS resource intentionally ignores the cutover-only control-plane attributes that were finalized through Azure API operations to avoid replacement-driven drift.
 
