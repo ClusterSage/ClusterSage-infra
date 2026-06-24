@@ -92,6 +92,15 @@ jobs:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
       - run: terraform fmt -check -recursive
         working-directory: ${{ env.TERRAFORM_ROOT }}
+      - name: Run Trivy Terraform scan
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: config
+          scan-ref: ${{ env.TERRAFORM_ROOT }}
+          format: table
+          exit-code: "1"
+          hide-progress: true
 
   plan:
     needs:
