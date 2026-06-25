@@ -11,6 +11,10 @@ resource "azurerm_resource_group" "this" {
   name     = var.resource_group_name
   location = var.location
   tags     = var.tags
+
+  lifecycle {
+    ignore_changes = [tags]
+  }
 }
 
 resource "azurerm_virtual_network" "this" {
@@ -20,6 +24,10 @@ resource "azurerm_virtual_network" "this" {
   location            = azurerm_resource_group.this[0].location
   address_space       = var.vnet_address_space
   tags                = var.tags
+
+  lifecycle {
+    ignore_changes = [tags]
+  }
 }
 
 resource "azurerm_subnet" "this" {
@@ -67,6 +75,10 @@ resource "azurerm_public_ip" "vm" {
   allocation_method   = "Static"
   sku                 = "Standard"
   tags                = var.tags
+
+  lifecycle {
+    ignore_changes = [tags]
+  }
 }
 
 resource "azurerm_network_security_group" "vm" {
@@ -75,6 +87,10 @@ resource "azurerm_network_security_group" "vm" {
   location            = azurerm_resource_group.this[0].location
   resource_group_name = azurerm_resource_group.this[0].name
   tags                = var.tags
+
+  lifecycle {
+    ignore_changes = [tags]
+  }
 
   dynamic "security_rule" {
     for_each = var.vm_nsg_allowed_source_prefixes
@@ -101,6 +117,10 @@ resource "azurerm_network_interface" "vm" {
   accelerated_networking_enabled = true
   tags                           = var.tags
 
+  lifecycle {
+    ignore_changes = [tags]
+  }
+
   ip_configuration {
     name                          = "ipconfig1"
     subnet_id                     = azurerm_subnet.this[0].id
@@ -126,6 +146,7 @@ resource "azapi_resource" "vm" {
   ignore_missing_property   = true
 
   body = {
+    tags = var.tags
     properties = {
       additionalCapabilities = {
         hibernationEnabled = false
@@ -196,6 +217,7 @@ resource "azapi_resource" "vm" {
 
   lifecycle {
     ignore_changes = [
+      body.tags,
       body.properties.osProfile.adminPassword,
       body.properties.storageProfile.osDisk.name,
       body.properties.storageProfile.osDisk.managedDisk,
@@ -215,4 +237,8 @@ resource "azurerm_bastion_host" "this" {
   sku                 = "Developer"
   virtual_network_id  = azurerm_virtual_network.this[0].id
   tags                = var.tags
+
+  lifecycle {
+    ignore_changes = [tags]
+  }
 }

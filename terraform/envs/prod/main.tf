@@ -416,7 +416,10 @@ module "jump_access" {
   vm_nsg_allowed_source_prefixes = var.jump_access_vm_nsg_allowed_source_prefixes
   bastion_name                   = var.jump_access_bastion_name
   vm_os_disk_name                = var.jump_access_vm_os_disk_name
-  tags                           = var.jump_access_tags
+  tags = merge(local.tags, {
+    Environment = "Prod"
+    Service     = "Platform"
+  }, var.jump_access_tags)
 }
 
 module "frontdoor" {
