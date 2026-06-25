@@ -129,7 +129,7 @@ resource "azurerm_dashboard_grafana" "managed" {
 resource "azurerm_role_assignment" "managed_grafana_monitoring_data_reader" {
   count = var.aks_managed_observability_enabled ? 1 : 0
 
-  scope                = azurerm_monitor_workspace.managed_prometheus[0].id
+  scope                = lower(azurerm_monitor_workspace.managed_prometheus[0].id)
   role_definition_name = "Monitoring Data Reader"
   principal_id         = azurerm_dashboard_grafana.managed[0].identity[0].principal_id
 }
@@ -175,27 +175,6 @@ resource "azurerm_role_assignment" "aks_node_subnet_network_contributor" {
   scope                = module.networking.aks_subnet_id
   role_definition_name = "Network Contributor"
   principal_id         = module.aks_control_plane_identity.principal_id
-}
-
-resource "terraform_data" "aks_managed_observability" {
-  count = var.aks_managed_observability_enabled ? 1 : 0
-
-  triggers_replace = {
-    aks_name                   = module.aks.aks_name
-    resource_group_name        = module.resource_group.name
-    azure_monitor_workspace_id = azurerm_monitor_workspace.managed_prometheus[0].id
-    grafana_id                 = azurerm_dashboard_grafana.managed[0].id
-  }
-
-  provisioner "local-exec" {
-    interpreter = ["pwsh", "-Command"]
-    command     = "az aks update --resource-group '${module.resource_group.name}' --name '${module.aks.aks_name}' --enable-azure-monitor-metrics --azure-monitor-workspace-resource-id '${azurerm_monitor_workspace.managed_prometheus[0].id}' --grafana-resource-id '${azurerm_dashboard_grafana.managed[0].id}' --only-show-errors --yes"
-  }
-
-  depends_on = [
-    azurerm_dashboard_grafana.managed,
-    azurerm_role_assignment.managed_grafana_monitoring_data_reader,
-  ]
 }
 
 data "azurerm_kubernetes_cluster" "bootstrap" {
@@ -412,6 +391,32 @@ module "jumpbox" {
   vm_size             = var.jumpbox_vm_size
   allowed_ssh_cidrs   = var.jumpbox_allowed_ssh_cidrs
   tags                = local.tags
+}
+
+module "jump_access" {
+  source                         = "../../modules/jump-access"
+  enabled                        = var.jump_access_enabled
+  resource_group_name            = var.jump_access_resource_group_name
+  location                       = var.jump_access_location
+  vnet_name                      = var.jump_access_vnet_name
+  vnet_address_space             = var.jump_access_vnet_address_space
+  subnet_name                    = var.jump_access_subnet_name
+  subnet_prefixes                = var.jump_access_subnet_prefixes
+  prod_vnet_id                   = module.networking.vnet_id
+  prod_vnet_name                 = "vnet-${local.name_prefix}"
+  prod_resource_group_name       = module.resource_group.name
+  prod_to_jump_peering_name      = var.jump_access_prod_to_jump_peering_name
+  jump_to_prod_peering_name      = var.jump_access_jump_to_prod_peering_name
+  vm_name                        = var.jump_access_vm_name
+  vm_admin_username              = var.jump_access_vm_admin_username
+  vm_size                        = var.jump_access_vm_size
+  vm_public_ip_name              = var.jump_access_vm_public_ip_name
+  vm_nic_name                    = var.jump_access_vm_nic_name
+  vm_nsg_name                    = var.jump_access_vm_nsg_name
+  vm_nsg_allowed_source_prefixes = var.jump_access_vm_nsg_allowed_source_prefixes
+  bastion_name                   = var.jump_access_bastion_name
+  vm_os_disk_name                = var.jump_access_vm_os_disk_name
+  tags                           = var.jump_access_tags
 }
 
 module "frontdoor" {
