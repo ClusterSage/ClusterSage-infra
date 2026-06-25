@@ -448,8 +448,7 @@ module "frontdoor" {
     for domain_name in var.frontdoor_custom_domain_names : domain_name => {}
   }
 
-  routes = 
-    local.frontdoor_origin_ready ? {
+  routes = local.frontdoor_origin_ready ? {
       route-all = {
         origin_group_name   = "prod"
         origin_names        = ["prod"]
