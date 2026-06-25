@@ -448,27 +448,5 @@ module "frontdoor" {
     for domain_name in var.frontdoor_custom_domain_names : domain_name => {}
   }
 
-  routes = merge(
-    local.frontdoor_origin_ready ? {
-      route-static-assets = {
-        origin_group_name   = "prod"
-        origin_names        = ["prod"]
-        patterns_to_match   = ["/_next/static/*"]
-        custom_domain_names = var.frontdoor_custom_domain_names
-        cache = {
-          compression_enabled           = true
-          content_types_to_compress     = ["application/javascript", "application/json", "image/svg+xml", "text/css", "text/javascript"]
-          query_string_caching_behavior = "IgnoreQueryString"
-        }
-      }
-    } : {},
-    local.frontdoor_origin_ready ? {
-      route-all = {
-        origin_group_name   = "prod"
-        origin_names        = ["prod"]
-        patterns_to_match   = ["/*"]
-        custom_domain_names = var.frontdoor_custom_domain_names
-      }
-    } : {}
-  )
+
 }
