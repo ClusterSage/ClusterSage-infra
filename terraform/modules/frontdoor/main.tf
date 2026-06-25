@@ -101,6 +101,17 @@ resource "azurerm_cdn_frontdoor_route" "main" {
     for domain_name in each.value.custom_domain_names :
     azurerm_cdn_frontdoor_custom_domain.main[domain_name].id
   ]
+
+  dynamic "cache" {
+    for_each = each.value.cache == null ? [] : [each.value.cache]
+
+    content {
+      compression_enabled           = try(cache.value.compression_enabled, null)
+      content_types_to_compress     = try(cache.value.content_types_to_compress, null)
+      query_string_caching_behavior = try(cache.value.query_string_caching_behavior, null)
+      query_strings                 = try(cache.value.query_strings, null)
+    }
+  }
 }
 
 resource "azurerm_cdn_frontdoor_security_policy" "main" {
