@@ -332,6 +332,101 @@ variable "jumpbox_allowed_ssh_cidrs" {
   default = []
 }
 
+variable "jump_access_enabled" {
+  type    = bool
+  default = true
+}
+
+variable "jump_access_resource_group_name" {
+  type    = string
+  default = "jump-rg"
+}
+
+variable "jump_access_location" {
+  type    = string
+  default = "Australia Central"
+}
+
+variable "jump_access_vnet_name" {
+  type    = string
+  default = "jump-vnet"
+}
+
+variable "jump_access_vnet_address_space" {
+  type    = list(string)
+  default = ["11.0.0.0/16"]
+}
+
+variable "jump_access_subnet_name" {
+  type    = string
+  default = "default"
+}
+
+variable "jump_access_subnet_prefixes" {
+  type    = list(string)
+  default = ["11.0.0.0/24"]
+}
+
+variable "jump_access_prod_to_jump_peering_name" {
+  type    = string
+  default = "vnet-p1"
+}
+
+variable "jump_access_jump_to_prod_peering_name" {
+  type    = string
+  default = "vnet-p2"
+}
+
+variable "jump_access_vm_name" {
+  type    = string
+  default = "jump-vm"
+}
+
+variable "jump_access_vm_admin_username" {
+  type    = string
+  default = "norah"
+}
+
+variable "jump_access_vm_size" {
+  type    = string
+  default = "Standard_D2as_v4"
+}
+
+variable "jump_access_vm_public_ip_name" {
+  type    = string
+  default = "jump-vm-ip"
+}
+
+variable "jump_access_vm_nic_name" {
+  type    = string
+  default = "jump-vm416"
+}
+
+variable "jump_access_vm_nsg_name" {
+  type    = string
+  default = "jump-vm-nsg"
+}
+
+variable "jump_access_vm_os_disk_name" {
+  type    = string
+  default = "jump-vm_OsDisk_1_c11cf0544f8b464f902b9154480a0050"
+}
+
+variable "jump_access_vm_nsg_allowed_source_prefixes" {
+  type    = list(string)
+  default = ["*"]
+}
+
+variable "jump_access_bastion_name" {
+  type    = string
+  default = "jump-vnet-bastion"
+}
+
+variable "jump_access_tags" {
+  type    = map(string)
+  default = {}
+}
+
 variable "create_frontdoor" {
   type    = bool
   default = true
@@ -364,12 +459,12 @@ variable "azure_monitor_workspace_public_network_access_enabled" {
 
 variable "managed_grafana_name" {
   type    = string
-  default = null
+  default = "grafana-csage-prod"
 }
 
 variable "managed_grafana_major_version" {
   type    = string
-  default = "11"
+  default = "12"
 }
 
 variable "managed_grafana_sku" {

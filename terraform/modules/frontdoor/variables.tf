@@ -46,5 +46,11 @@ variable "routes" {
     patterns_to_match   = list(string)
     custom_domain_names = optional(list(string), [])
     forwarding_protocol = optional(string, "HttpOnly")
+    cache = optional(object({
+      compression_enabled           = optional(bool)
+      content_types_to_compress     = optional(list(string))
+      query_string_caching_behavior = optional(string)
+      query_strings                 = optional(list(string))
+    }))
   }))
 }
