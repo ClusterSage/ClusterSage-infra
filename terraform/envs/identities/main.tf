@@ -12,8 +12,6 @@ locals {
   ) : "AcrPush"
 }
 
-# One shared Microsoft Entra application registration for all ClusterSage
-# GitHub Actions workflows.
 resource "azuread_application" "github_actions" {
   display_name            = var.github_actions_application_name
   sign_in_audience        = "AzureADMyOrg"
@@ -24,8 +22,6 @@ resource "azuread_application" "github_actions" {
   ]
 }
 
-# Enterprise application / service principal belonging to the app registration.
-# Azure RBAC permissions are assigned to this object.
 resource "azuread_service_principal" "github_actions" {
   client_id                    = azuread_application.github_actions.client_id
   app_role_assignment_required = false
@@ -35,12 +31,6 @@ resource "azuread_service_principal" "github_actions" {
   ]
 }
 
-# Creates multiple federated credentials under the same application.
-# Examples:
-# - frontend main branch
-# - services main branch
-# - infra main branch
-# - docs main branch
 resource "azuread_application_federated_identity_credential" "github" {
   for_each = var.github_federated_credentials
 
@@ -60,11 +50,6 @@ resource "azuread_application_federated_identity_credential" "github" {
   subject = each.value.subject
 }
 
-# Grants the shared GitHub Actions identity permission to push images
-# to the global shared ACR.
-# If ABAC is enabled, Repository Writer without an ABAC condition grants
-# writer permission across every repository in the registry.
-# If ABAC is disabled, AcrPush grants push/pull permission across the registry.
 resource "azurerm_role_assignment" "github_acr_push" {
   scope                = data.azurerm_container_registry.global_shared.id
   role_definition_name = local.acr_push_role_name
@@ -72,10 +57,6 @@ resource "azurerm_role_assignment" "github_acr_push" {
 
   skip_service_principal_aad_check = true
 }
-
-# Optional future permissions for Terraform or deployment workflows.
-#
-# Keep this empty until each permission is genuinely required.
 resource "azurerm_role_assignment" "additional" {
   for_each = var.additional_role_assignments
 
